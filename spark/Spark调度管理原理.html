@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Spark调度管理原理</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+/* GitHub stylesheet for MarkdownPad (http://markdownpad.com) */
+/* Author: Nicolas Hery - http://nicolashery.com */
+/* Version: b13fe65ca28d2e568c6ed5d7f06581183df8f2ff */
+/* Source: https://github.com/nicolahery/markdownpad-github */
+
+/* RESET
+=============================================================================*/
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* BODY
+=============================================================================*/
+
+body {
+  font-family: Helvetica, arial, freesans, clean, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  background-color: #fff;
+  padding: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+body>*:first-child {
+  margin-top: 0 !important;
+}
+
+body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* BLOCKS
+=============================================================================*/
+
+p, blockquote, ul, ol, dl, table, pre {
+  margin: 15px 0;
+}
+
+/* HEADERS
+=============================================================================*/
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 20px 0 10px;
+  padding: 0;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 tt, h1 code, h2 tt, h2 code, h3 tt, h3 code, h4 tt, h4 code, h5 tt, h5 code, h6 tt, h6 code {
+  font-size: inherit;
+}
+
+h1 {
+  font-size: 28px;
+  color: #000;
+}
+
+h2 {
+  font-size: 24px;
+  border-bottom: 1px solid #ccc;
+  color: #000;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+h4 {
+  font-size: 16px;
+}
+
+h5 {
+  font-size: 14px;
+}
+
+h6 {
+  color: #777;
+  font-size: 14px;
+}
+
+body>h2:first-child, body>h1:first-child, body>h1:first-child+h2, body>h3:first-child, body>h4:first-child, body>h5:first-child, body>h6:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+h1+p, h2+p, h3+p, h4+p, h5+p, h6+p {
+  margin-top: 10px;
+}
+
+/* LINKS
+=============================================================================*/
+
+a {
+  color: #4183C4;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* LISTS
+=============================================================================*/
+
+ul, ol {
+  padding-left: 30px;
+}
+
+ul li > :first-child, 
+ol li > :first-child, 
+ul li ul:first-of-type, 
+ol li ol:first-of-type, 
+ul li ol:first-of-type, 
+ol li ul:first-of-type {
+  margin-top: 0px;
+}
+
+ul ul, ul ol, ol ol, ol ul {
+  margin-bottom: 0;
+}
+
+dl {
+  padding: 0;
+}
+
+dl dt {
+  font-size: 14px;
+  font-weight: bold;
+  font-style: italic;
+  padding: 0;
+  margin: 15px 0 5px;
+}
+
+dl dt:first-child {
+  padding: 0;
+}
+
+dl dt>:first-child {
+  margin-top: 0px;
+}
+
+dl dt>:last-child {
+  margin-bottom: 0px;
+}
+
+dl dd {
+  margin: 0 0 15px;
+  padding: 0 15px;
+}
+
+dl dd>:first-child {
+  margin-top: 0px;
+}
+
+dl dd>:last-child {
+  margin-bottom: 0px;
+}
+
+/* CODE
+=============================================================================*/
+
+pre, code, tt {
+  font-size: 12px;
+  font-family: Consolas, "Liberation Mono", Courier, monospace;
+}
+
+code, tt {
+  margin: 0 0px;
+  padding: 0px 0px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+}
+
+pre>code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent;
+}
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px;
+}
+
+pre code, pre tt {
+  background-color: transparent;
+  border: none;
+}
+
+kbd {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #DDDDDD;
+    background-image: linear-gradient(#F1F1F1, #DDDDDD);
+    background-repeat: repeat-x;
+    border-color: #DDDDDD #CCCCCC #CCCCCC #DDDDDD;
+    border-image: none;
+    border-radius: 2px 2px 2px 2px;
+    border-style: solid;
+    border-width: 1px;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    line-height: 10px;
+    padding: 1px 4px;
+}
+
+/* QUOTES
+=============================================================================*/
+
+blockquote {
+  border-left: 4px solid #DDD;
+  padding: 0 15px;
+  color: #777;
+}
+
+blockquote>:first-child {
+  margin-top: 0px;
+}
+
+blockquote>:last-child {
+  margin-bottom: 0px;
+}
+
+/* HORIZONTAL RULES
+=============================================================================*/
+
+hr {
+  clear: both;
+  margin: 15px 0;
+  height: 0px;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  border-bottom: 4px solid #ddd;
+  padding: 0;
+}
+
+/* TABLES
+=============================================================================*/
+
+table th {
+  font-weight: bold;
+}
+
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 6px 13px;
+}
+
+table tr {
+  border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+table tr:nth-child(2n) {
+  background-color: #f8f8f8;
+}
+
+/* IMAGES
+=============================================================================*/
+
+img {
+  max-width: 100%
+}
+</style>
+<style type="text/css">
+.highlight  { background: #ffffff; }
+.highlight .c { color: #999988; font-style: italic } /* Comment */
+.highlight .err { color: #a61717; background-color: #e3d2d2 } /* Error */
+.highlight .k { font-weight: bold } /* Keyword */
+.highlight .o { font-weight: bold } /* Operator */
+.highlight .cm { color: #999988; font-style: italic } /* Comment.Multiline */
+.highlight .cp { color: #999999; font-weight: bold } /* Comment.Preproc */
+.highlight .c1 { color: #999988; font-style: italic } /* Comment.Single */
+.highlight .cs { color: #999999; font-weight: bold; font-style: italic } /* Comment.Special */
+.highlight .gd { color: #000000; background-color: #ffdddd } /* Generic.Deleted */
+.highlight .gd .x { color: #000000; background-color: #ffaaaa } /* Generic.Deleted.Specific */
+.highlight .ge { font-style: italic } /* Generic.Emph */
+.highlight .gr { color: #aa0000 } /* Generic.Error */
+.highlight .gh { color: #999999 } /* Generic.Heading */
+.highlight .gi { color: #000000; background-color: #ddffdd } /* Generic.Inserted */
+.highlight .gi .x { color: #000000; background-color: #aaffaa } /* Generic.Inserted.Specific */
+.highlight .go { color: #888888 } /* Generic.Output */
+.highlight .gp { color: #555555 } /* Generic.Prompt */
+.highlight .gs { font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #aaaaaa } /* Generic.Subheading */
+.highlight .gt { color: #aa0000 } /* Generic.Traceback */
+.highlight .kc { font-weight: bold } /* Keyword.Constant */
+.highlight .kd { font-weight: bold } /* Keyword.Declaration */
+.highlight .kp { font-weight: bold } /* Keyword.Pseudo */
+.highlight .kr { font-weight: bold } /* Keyword.Reserved */
+.highlight .kt { color: #445588; font-weight: bold } /* Keyword.Type */
+.highlight .m { color: #009999 } /* Literal.Number */
+.highlight .s { color: #d14 } /* Literal.String */
+.highlight .na { color: #008080 } /* Name.Attribute */
+.highlight .nb { color: #0086B3 } /* Name.Builtin */
+.highlight .nc { color: #445588; font-weight: bold } /* Name.Class */
+.highlight .no { color: #008080 } /* Name.Constant */
+.highlight .ni { color: #800080 } /* Name.Entity */
+.highlight .ne { color: #990000; font-weight: bold } /* Name.Exception */
+.highlight .nf { color: #990000; font-weight: bold } /* Name.Function */
+.highlight .nn { color: #555555 } /* Name.Namespace */
+.highlight .nt { color: #000080 } /* Name.Tag */
+.highlight .nv { color: #008080 } /* Name.Variable */
+.highlight .ow { font-weight: bold } /* Operator.Word */
+.highlight .w { color: #bbbbbb } /* Text.Whitespace */
+.highlight .mf { color: #009999 } /* Literal.Number.Float */
+.highlight .mh { color: #009999 } /* Literal.Number.Hex */
+.highlight .mi { color: #009999 } /* Literal.Number.Integer */
+.highlight .mo { color: #009999 } /* Literal.Number.Oct */
+.highlight .sb { color: #d14 } /* Literal.String.Backtick */
+.highlight .sc { color: #d14 } /* Literal.String.Char */
+.highlight .sd { color: #d14 } /* Literal.String.Doc */
+.highlight .s2 { color: #d14 } /* Literal.String.Double */
+.highlight .se { color: #d14 } /* Literal.String.Escape */
+.highlight .sh { color: #d14 } /* Literal.String.Heredoc */
+.highlight .si { color: #d14 } /* Literal.String.Interpol */
+.highlight .sx { color: #d14 } /* Literal.String.Other */
+.highlight .sr { color: #009926 } /* Literal.String.Regex */
+.highlight .s1 { color: #d14 } /* Literal.String.Single */
+.highlight .ss { color: #990073 } /* Literal.String.Symbol */
+.highlight .bp { color: #999999 } /* Name.Builtin.Pseudo */
+.highlight .vc { color: #008080 } /* Name.Variable.Class */
+.highlight .vg { color: #008080 } /* Name.Variable.Global */
+.highlight .vi { color: #008080 } /* Name.Variable.Instance */
+.highlight .il { color: #009999 } /* Literal.Number.Integer.Long */
+.pl-c {
+    color: #969896;
+}
+
+.pl-c1,.pl-mdh,.pl-mm,.pl-mp,.pl-mr,.pl-s1 .pl-v,.pl-s3,.pl-sc,.pl-sv {
+    color: #0086b3;
+}
+
+.pl-e,.pl-en {
+    color: #795da3;
+}
+
+.pl-s1 .pl-s2,.pl-smi,.pl-smp,.pl-stj,.pl-vo,.pl-vpf {
+    color: #333;
+}
+
+.pl-ent {
+    color: #63a35c;
+}
+
+.pl-k,.pl-s,.pl-st {
+    color: #a71d5d;
+}
+
+.pl-pds,.pl-s1,.pl-s1 .pl-pse .pl-s2,.pl-sr,.pl-sr .pl-cce,.pl-sr .pl-sra,.pl-sr .pl-sre,.pl-src,.pl-v {
+    color: #df5000;
+}
+
+.pl-id {
+    color: #b52a1d;
+}
+
+.pl-ii {
+    background-color: #b52a1d;
+    color: #f8f8f8;
+}
+
+.pl-sr .pl-cce {
+    color: #63a35c;
+    font-weight: bold;
+}
+
+.pl-ml {
+    color: #693a17;
+}
+
+.pl-mh,.pl-mh .pl-en,.pl-ms {
+    color: #1d3e81;
+    font-weight: bold;
+}
+
+.pl-mq {
+    color: #008080;
+}
+
+.pl-mi {
+    color: #333;
+    font-style: italic;
+}
+
+.pl-mb {
+    color: #333;
+    font-weight: bold;
+}
+
+.pl-md,.pl-mdhf {
+    background-color: #ffecec;
+    color: #bd2c00;
+}
+
+.pl-mdht,.pl-mi1 {
+    background-color: #eaffea;
+    color: #55a532;
+}
+
+.pl-mdr {
+    color: #795da3;
+    font-weight: bold;
+}
+
+.pl-mo {
+    color: #1d3e81;
+}
+.task-list {
+padding-left:10px;
+margin-bottom:0;
+}
+
+.task-list li {
+    margin-left: 20px;
+}
+
+.task-list-item {
+list-style-type:none;
+padding-left:10px;
+}
+
+.task-list-item label {
+font-weight:400;
+}
+
+.task-list-item.enabled label {
+cursor:pointer;
+}
+
+.task-list-item+.task-list-item {
+margin-top:3px;
+}
+
+.task-list-item-checkbox {
+display:inline-block;
+margin-left:-20px;
+margin-right:3px;
+vertical-align:1px;
+}
+</style>
+</head>
+<body>
+<h3 id="-">概述</h3>
+<p><em>DAGScheduler和TaskScheduler概念：</em></p>
+<p>在作业调度的相关类中，最重要的就是DAGScheduler，顾名思义就是基于DAG图的调度类。在这个图中，从任意一个顶点出发，没有任何一条路径会将其带回到出发的顶点。</p>
+<p>++DAGScheduler负责将作业拆分成不同阶段的具有依赖关系的多批任务，可以理解为DAGScheduler负责任务的逻辑调度。++</p>
+<p>++TaskScheduler负责每个具体任务的实际物理调度。++</p>
+<h3 id="spark-">Spark调度相关基本概念（从小到大）</h3>
+<p><img src="http://static.oschina.net/uploads/space/2016/0214/164505_BsFw_2321626.png" alt="image"></p>
+<ul>
+<li>Task（任务）：单个分区数据集上的最小处理流程单元</li><li>TaskSet（任务集）：由一组关联的，但互相之间没有Shuffle依赖关系的任务所组成的任务集，++Stage与TaskSet是一一对应关系++。</li><li>Stage（调度阶段）：一个任务集对应的调度阶段</li><li>Job（作业）：由一个RDD Action生成的一个或多个调度阶段所组成的一次计算作业</li><li>Application（应用程序）：Spark应用程序，由一个或多个作业组成</li></ul>
+<h3 id="-">作业调度模块顶层逻辑概述</h3>
+<p>在Spark应用程序中，用户代码基本是基于RDD的一系列计算操作。在实际运行时，这些计算操作是延迟执行的（transfermation），并不是所有的RDD操作都会触发Spark向集群提交实际作业，只有一些需要返回数据或者向外部输出数据的操作才会触发实际的计算工作（action），其他的变换操作只是生成对应的RDD关系链，用来记录依赖关系和所需执行的运算。</p>
+<p>触发作业提交的操作举例，将一个RDD内部的数据以Array的形式返回给用户的函数rdd.collect(),它的实现如下</p>
+<pre><code>def collect(): Array[T]={
+    //collect操作触发的一次作业提交
+    val results = sc.runJob(this,(iter:Iterator[T])=&gt;iter.toArray)
+    Array.concat(results: _*)
+}
+</code></pre><p>可以看到作业的提交是在RDD的相关操作中被隐式调用的，不需要用户显示提交作业。在SparkContext内部，作业的提交将进一步调用DAGScheduler的作业提交接口。</p>
+<p>DAGScheduler最重要的任务之一是计算作业和任务的依赖关系，制定调度逻辑。DAGScheduler中作业调度的发起，对外暴漏的两个主要入口分别是submitJob和runJob。前者返回一个Jobwaiter对象，可以用在异步调用（一个可以无需等待被调用函数的返回值就让操作继续进行的方法）中，用来判断作业完成或者取消作业，而后者在内部调用submitJob，阻塞等待直到作业完成。</p>
+<h3 id="-">作业调度具体工作流程</h3>
+<p>下图为每个作业从提交到完成经历的多个步骤，其中以任务为最小单位，按照一定的逻辑依赖关系依次提交执行，并返回结果。<br><img src="http://static.oschina.net/uploads/space/2016/0215/114317_U2aJ_2321626.jpg" alt="image"></p>
+<p>下图从作业调度工作流程中所涉及的具体类模块的角度出发，展示了各个工作流程与类模块的关系，从整体上给出了一个各类之间在作业调度过程中的交互关系。<br><img src="http://static.oschina.net/uploads/space/2016/0215/114446_a9C4_2321626.jpg" alt="image"></p>
+<ul>
+<li>调度阶段的拆分</li></ul>
+<p>当一个RDD操作触发计算，向DAGScheduler提交作业时，DAGScheduler需要从RDD依赖链末端的RDD出发，遍历整个RDD依赖链，划分调度阶段（Stage），并决定各个调度阶段（Stage）的依赖关系。</p>
+<p>调度阶段（Stage）的划分是以ShuffleDependency为依据的，也就是说++当某个RDD的运算需要将数据进行shuffle操作时，这个包含了Shuffle依赖关系的RDD将被用来作为输入信息，构建一个新的调度阶段++，以此为依据划分调度阶段，可以确保有依赖关系的数据能够按照正确的顺序得到处理和运算。</p>
+<p>以GroupByKey操作为例，该操作返回的结果实际上是一个ShuffleRDD，当DAGScheduler遍历到这个ShuffleRDD的时候，因为其依赖关系是一个Shuffle-Dependency，于是这个ShuffleRDD的父RDD以及ShuffleDependcy等对象就被用来构建一个新的Stage。这个Stage的输出结果的分区方式，则由ShuffleDependency中的Partitioner对象决定。</p>
+<p>尽管划分和构建Stage的依据是ShuffleDependency，在前面的例子中对应的RDD是ShuffleRDD，但是这个Stage所处理的数据是从这个ShuffleRDD的父RDD开始的，只是最终的输出结果的位置信息参考了ShuffleRDD返回的ShuffleDependency里包含的内容。而++ShuffleRDD本身的运算操作（获取shuffle结果的过程），是在下一个Stage里面进行的。++</p>
+<p><em>++一个Job下不同的Stage是按照shuffle划分的++</em></p>
+<ul>
+<li>调度阶段的提交</li></ul>
+<p>在划分调度阶段的步骤中会得到一个或多个有依赖关系的调度阶段，其中++直接触发作业的RDD关联的调度节点被成为FinalStage，DAGScheduler进一步从这个FinalStage生成一个作业实例++。</p>
+<p>具体提交一个调度阶段时，首先判断该调度阶段所依赖的父调度阶段的结果是否可用，如果所有付调度阶段的结果都可用，则提交该调度阶段。如果有任何一个父调度阶段的结果不可用，则尝试迭代提交当前不可用的父调度阶段。所有在迭代过程中由于所依赖调度阶段的结果不可用而没有提交成功的调度阶段，都被放在等待队列中，等待将来被提交。</p>
+<p>举例：一个具有四个调度阶段的job调度阶段提交顺序，其中Stage3依赖Stage2，Stage2又依赖Stage0和Stage1。当一个属于中间过程调度阶段的任务完成后，DAGScheduler会检查对应的调度阶段的所有任务是否都完成了，如果都完成了，则DAGScheduler将重新扫描一次等待列表中的所有调度阶段的列表，检查它们是否还有任何依赖的调度阶段没有完成，如果没有，说明该调度阶段处于就绪状态，就可以再次尝试提交该调度阶段了。</p>
+<p>每完成一次DAGScheduler的时间循环，也会触发一次从等待和失败列表中扫描并提交就绪Stage的调用过程。</p>
+<ul>
+<li>任务集的提交</li></ul>
+<p>DAGScheduler通过TaskScheduler接口提交任务集，这个任务集最终会触发TaskScheduler构建一个TaskSetManager的实例来管理这个任务集的生命周期，对于DAGScheduler来说，提交调度阶段的工作到此就完成了。</p>
+<p>TaskScheduler的具体实现就会在得到计算资源的时候，进一步通过TaskSetManager调度具体的任务到对应的Executor节点上进行计算。</p>
+<ul>
+<li>完成状态的监控</li></ul>
+<p>DAGScheduler需要监控当前作业调度阶段乃至任务的完成情况。对于TaskScheduler来说，回调函数包括任务的开始结束失败等，DAGScheduler根据这些任务的生命周期进一步维护作业和调度阶段的状态信息。</p>
+<p>TaskScheduler还可以通过回调函数通知DAGScheduler具体的Executor的生命状态，如果某一个Executor崩溃了，或者由于其他原因与Driver失去联系了，则对应的调度节诶段任务及的ShuffleMapTask的输出结果也将被标志为不可用，这将导致对应任务集状态的变更，进而影响相关作业的状态，再进一步可能触发对应调度阶段的重新提交，从而重新执行相关计算任务，以获取丢失的相关数据。</p>
+<ul>
+<li>任务结果的获取</li></ul>
+<p>一个具体的任务在Executor中执行完毕后，其结果需要以某种形式返回给DAGScheduler，根据任务类型的不同，任务结果的返回方式不同。</p>
+<p>对于FinalStage所对应的任务（对应的类为ResultTask），返回给DAGScheduler的是运算结果本身；</p>
+<p>而对于中间调度阶段对应的任务ShuffleMapTask，返回给DAGScheduler的是一个MapStatus对象，MapStatus对象管理了ShuffleMapTask的运算输出结果在BlockManager里的相关信息，而非结果本身，这些存储位置信息将作为下一个调度阶段的任务获取输入数据的依据。</p>
+<h3 id="-">任务集管理模块</h3>
+<p>DAGScheduler负责将一组任务提交给TaskScheduler以后，这组任务的DAGScheduler的调度工作就已经完成了，接下来这组任务内部的调度逻辑，则是由TaskSetManager任务集管理模块来完成的。</p>
+<p>TaskSetManager的主要接口：</p>
+<p>ResourceOffer：根据TaskScheduler所提供的单个Resource资源以及任务的host、executor和locality本地性的要求返回一个合适的任务。</p>
+<p>handleSuccessfulTask/handleFailedTask/handleTaskGettingResult:用于更新任务的运行状态，TaskSetManager在这些函数中除了更新自身维护的任务状态列表等信息以用于剩余的任务调度外，还会进一步调用DAGScheduler的函数接口将结果通知给它。</p>
+<h3 id="-">调度池和调度模式分析</h3>
+<p>++DAGScheduler负责构建具有依赖关系的任务集；TaskSetManager负责在具体的任务集的内部调度任务；而TaskScheduler负责将资源提供给TaskSetManager供其作为调度任务的依据。++</p>
+<p>但是每个SparkContext可能有同时存在多个可运行的任务集（互相之间没有依赖关系，不是Stage），这些任务集之间如何调度，则是由调度池来决定的，调度池所管理的对象是下一级的调度池或TaskSetManager对象。</p>
+<p>目前的Spark代码实现了两种模式，对应以下两种类型的调度池</p>
+<p>FIFO：先进先出型，FIFO调度池最终根据StageID的顺序来调度TaskSetManager。</p>
+<p>FAIR：公平调度，公平调度池管理的对象是下一级的调度池，或者TaskSetManager，公平调度的基本原则是根据所管理的调度池/TaskSetManager中正在运行的任务的数量来判断优先级，用户可以设置minShare（最小任务数）、weight（任务权重）等参数来调整对应调度池里的任务集的优先程度。当采用公平调度模式的时候，所购建的调度池是两级结构，即根调度池管理一组子调度池，子调度池进一步管理属于该调度池的TaskSetManager。</p>
+<p>公平调度的配置通过配置文件来进行，默认使用fairscheduler.xml文件，范例参见conf目录下模版。</p>
+<p>++<em>调度池管理的是单个Spark应用程序内部的调度逻辑。正常情况下，多个Spark应用程序在调度池层面上是没有调度优先级关系的</em>。++</p>
+<p>作为长期运行的SparkContext，SparkServer代理运行了其他连上服务进程的Spark程序的任务，这样就可以为每个链接按照用户名指定一个调度池运行，从而实现用户优先级和资源分配的合理调度等。</p>
+<h3 id="spark-">Spark应用之间的调度关系</h3>
+<p>之前的调度池只是在SparkContext内部调度资源，SparkContext之间的调度关系按照Spark不同的运行模式，就不一定是归Spark管理的了。</p>
+<p>在Hadoop YARN管理的集群中，资源调度的策略是通过在conf/yarn-site.xml中设置yarn.resourcemanager.scheduler.class来选择的，可以配置的调度策略包括默认的FIFO，以及CapacityScheduler和FairScheduler等。在这种情况下，Spark应用程序的资源分配情况首先由YARN ResourceManager根据用户配置决定，然后在SparkContext内部由调度池进一步分配资源。</p>
+<p>只有在Standlone模式下，Spark Master按照当前集群资源是否满足的等待列表中的Spark应用对内存和CPU资源的需求，来决定是否创建一个应用程序的SparkContext对应的Driver，进而完成Spark应用的启动过程。这可以粗略地认为是 一种应用程序级别的粗粒度的有条件的FIFO策略。</p>
+<ul>
+<li>调度过程中的数据本地性的问题</li></ul>
+<p>TaskSetManager在适配任务时，会根据资源的情况和任务的数据来源，尽量选择最佳的Locality进行匹配。通常讲到数据本地性时，阈值相关联的原始数据在很多情况下都来自HDFS文件系统。</p>
+<p>与基于Hadoop YARN进行任务调度的系统相比，Spark的应用程序由于首先需要申请资源运行Executor，而后再调度任务，所以，如果第一步在申请资源运行Executor时没有任何数据本地性的信息，那么除非应用程序申请的计算资源足够多，从而保证了在每个节点上都有Executor，否则，在第二部调度任务时，是可能无法做到数据的本地处理的（因为数据所在的节点上并没有运行Executor）这种情况在大集群环境，应用程序处理的数据集较小。不需要申请很多资源时，是很容易发生的。</p>
+
+</body>
+</html>
+<!-- This document was created with MarkdownPad, the Markdown editor for Windows (http://markdownpad.com) -->

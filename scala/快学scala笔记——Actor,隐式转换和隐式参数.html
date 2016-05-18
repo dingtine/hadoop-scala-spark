@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>快学scala笔记——Actor,隐式转换和隐式参数</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+/* GitHub stylesheet for MarkdownPad (http://markdownpad.com) */
+/* Author: Nicolas Hery - http://nicolashery.com */
+/* Version: b13fe65ca28d2e568c6ed5d7f06581183df8f2ff */
+/* Source: https://github.com/nicolahery/markdownpad-github */
+
+/* RESET
+=============================================================================*/
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* BODY
+=============================================================================*/
+
+body {
+  font-family: Helvetica, arial, freesans, clean, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  background-color: #fff;
+  padding: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+body>*:first-child {
+  margin-top: 0 !important;
+}
+
+body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* BLOCKS
+=============================================================================*/
+
+p, blockquote, ul, ol, dl, table, pre {
+  margin: 15px 0;
+}
+
+/* HEADERS
+=============================================================================*/
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 20px 0 10px;
+  padding: 0;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 tt, h1 code, h2 tt, h2 code, h3 tt, h3 code, h4 tt, h4 code, h5 tt, h5 code, h6 tt, h6 code {
+  font-size: inherit;
+}
+
+h1 {
+  font-size: 28px;
+  color: #000;
+}
+
+h2 {
+  font-size: 24px;
+  border-bottom: 1px solid #ccc;
+  color: #000;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+h4 {
+  font-size: 16px;
+}
+
+h5 {
+  font-size: 14px;
+}
+
+h6 {
+  color: #777;
+  font-size: 14px;
+}
+
+body>h2:first-child, body>h1:first-child, body>h1:first-child+h2, body>h3:first-child, body>h4:first-child, body>h5:first-child, body>h6:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+h1+p, h2+p, h3+p, h4+p, h5+p, h6+p {
+  margin-top: 10px;
+}
+
+/* LINKS
+=============================================================================*/
+
+a {
+  color: #4183C4;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* LISTS
+=============================================================================*/
+
+ul, ol {
+  padding-left: 30px;
+}
+
+ul li > :first-child, 
+ol li > :first-child, 
+ul li ul:first-of-type, 
+ol li ol:first-of-type, 
+ul li ol:first-of-type, 
+ol li ul:first-of-type {
+  margin-top: 0px;
+}
+
+ul ul, ul ol, ol ol, ol ul {
+  margin-bottom: 0;
+}
+
+dl {
+  padding: 0;
+}
+
+dl dt {
+  font-size: 14px;
+  font-weight: bold;
+  font-style: italic;
+  padding: 0;
+  margin: 15px 0 5px;
+}
+
+dl dt:first-child {
+  padding: 0;
+}
+
+dl dt>:first-child {
+  margin-top: 0px;
+}
+
+dl dt>:last-child {
+  margin-bottom: 0px;
+}
+
+dl dd {
+  margin: 0 0 15px;
+  padding: 0 15px;
+}
+
+dl dd>:first-child {
+  margin-top: 0px;
+}
+
+dl dd>:last-child {
+  margin-bottom: 0px;
+}
+
+/* CODE
+=============================================================================*/
+
+pre, code, tt {
+  font-size: 12px;
+  font-family: Consolas, "Liberation Mono", Courier, monospace;
+}
+
+code, tt {
+  margin: 0 0px;
+  padding: 0px 0px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+}
+
+pre>code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent;
+}
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px;
+}
+
+pre code, pre tt {
+  background-color: transparent;
+  border: none;
+}
+
+kbd {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #DDDDDD;
+    background-image: linear-gradient(#F1F1F1, #DDDDDD);
+    background-repeat: repeat-x;
+    border-color: #DDDDDD #CCCCCC #CCCCCC #DDDDDD;
+    border-image: none;
+    border-radius: 2px 2px 2px 2px;
+    border-style: solid;
+    border-width: 1px;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    line-height: 10px;
+    padding: 1px 4px;
+}
+
+/* QUOTES
+=============================================================================*/
+
+blockquote {
+  border-left: 4px solid #DDD;
+  padding: 0 15px;
+  color: #777;
+}
+
+blockquote>:first-child {
+  margin-top: 0px;
+}
+
+blockquote>:last-child {
+  margin-bottom: 0px;
+}
+
+/* HORIZONTAL RULES
+=============================================================================*/
+
+hr {
+  clear: both;
+  margin: 15px 0;
+  height: 0px;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  border-bottom: 4px solid #ddd;
+  padding: 0;
+}
+
+/* TABLES
+=============================================================================*/
+
+table th {
+  font-weight: bold;
+}
+
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 6px 13px;
+}
+
+table tr {
+  border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+table tr:nth-child(2n) {
+  background-color: #f8f8f8;
+}
+
+/* IMAGES
+=============================================================================*/
+
+img {
+  max-width: 100%
+}
+</style>
+<style type="text/css">
+.highlight  { background: #ffffff; }
+.highlight .c { color: #999988; font-style: italic } /* Comment */
+.highlight .err { color: #a61717; background-color: #e3d2d2 } /* Error */
+.highlight .k { font-weight: bold } /* Keyword */
+.highlight .o { font-weight: bold } /* Operator */
+.highlight .cm { color: #999988; font-style: italic } /* Comment.Multiline */
+.highlight .cp { color: #999999; font-weight: bold } /* Comment.Preproc */
+.highlight .c1 { color: #999988; font-style: italic } /* Comment.Single */
+.highlight .cs { color: #999999; font-weight: bold; font-style: italic } /* Comment.Special */
+.highlight .gd { color: #000000; background-color: #ffdddd } /* Generic.Deleted */
+.highlight .gd .x { color: #000000; background-color: #ffaaaa } /* Generic.Deleted.Specific */
+.highlight .ge { font-style: italic } /* Generic.Emph */
+.highlight .gr { color: #aa0000 } /* Generic.Error */
+.highlight .gh { color: #999999 } /* Generic.Heading */
+.highlight .gi { color: #000000; background-color: #ddffdd } /* Generic.Inserted */
+.highlight .gi .x { color: #000000; background-color: #aaffaa } /* Generic.Inserted.Specific */
+.highlight .go { color: #888888 } /* Generic.Output */
+.highlight .gp { color: #555555 } /* Generic.Prompt */
+.highlight .gs { font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #aaaaaa } /* Generic.Subheading */
+.highlight .gt { color: #aa0000 } /* Generic.Traceback */
+.highlight .kc { font-weight: bold } /* Keyword.Constant */
+.highlight .kd { font-weight: bold } /* Keyword.Declaration */
+.highlight .kp { font-weight: bold } /* Keyword.Pseudo */
+.highlight .kr { font-weight: bold } /* Keyword.Reserved */
+.highlight .kt { color: #445588; font-weight: bold } /* Keyword.Type */
+.highlight .m { color: #009999 } /* Literal.Number */
+.highlight .s { color: #d14 } /* Literal.String */
+.highlight .na { color: #008080 } /* Name.Attribute */
+.highlight .nb { color: #0086B3 } /* Name.Builtin */
+.highlight .nc { color: #445588; font-weight: bold } /* Name.Class */
+.highlight .no { color: #008080 } /* Name.Constant */
+.highlight .ni { color: #800080 } /* Name.Entity */
+.highlight .ne { color: #990000; font-weight: bold } /* Name.Exception */
+.highlight .nf { color: #990000; font-weight: bold } /* Name.Function */
+.highlight .nn { color: #555555 } /* Name.Namespace */
+.highlight .nt { color: #000080 } /* Name.Tag */
+.highlight .nv { color: #008080 } /* Name.Variable */
+.highlight .ow { font-weight: bold } /* Operator.Word */
+.highlight .w { color: #bbbbbb } /* Text.Whitespace */
+.highlight .mf { color: #009999 } /* Literal.Number.Float */
+.highlight .mh { color: #009999 } /* Literal.Number.Hex */
+.highlight .mi { color: #009999 } /* Literal.Number.Integer */
+.highlight .mo { color: #009999 } /* Literal.Number.Oct */
+.highlight .sb { color: #d14 } /* Literal.String.Backtick */
+.highlight .sc { color: #d14 } /* Literal.String.Char */
+.highlight .sd { color: #d14 } /* Literal.String.Doc */
+.highlight .s2 { color: #d14 } /* Literal.String.Double */
+.highlight .se { color: #d14 } /* Literal.String.Escape */
+.highlight .sh { color: #d14 } /* Literal.String.Heredoc */
+.highlight .si { color: #d14 } /* Literal.String.Interpol */
+.highlight .sx { color: #d14 } /* Literal.String.Other */
+.highlight .sr { color: #009926 } /* Literal.String.Regex */
+.highlight .s1 { color: #d14 } /* Literal.String.Single */
+.highlight .ss { color: #990073 } /* Literal.String.Symbol */
+.highlight .bp { color: #999999 } /* Name.Builtin.Pseudo */
+.highlight .vc { color: #008080 } /* Name.Variable.Class */
+.highlight .vg { color: #008080 } /* Name.Variable.Global */
+.highlight .vi { color: #008080 } /* Name.Variable.Instance */
+.highlight .il { color: #009999 } /* Literal.Number.Integer.Long */
+.pl-c {
+    color: #969896;
+}
+
+.pl-c1,.pl-mdh,.pl-mm,.pl-mp,.pl-mr,.pl-s1 .pl-v,.pl-s3,.pl-sc,.pl-sv {
+    color: #0086b3;
+}
+
+.pl-e,.pl-en {
+    color: #795da3;
+}
+
+.pl-s1 .pl-s2,.pl-smi,.pl-smp,.pl-stj,.pl-vo,.pl-vpf {
+    color: #333;
+}
+
+.pl-ent {
+    color: #63a35c;
+}
+
+.pl-k,.pl-s,.pl-st {
+    color: #a71d5d;
+}
+
+.pl-pds,.pl-s1,.pl-s1 .pl-pse .pl-s2,.pl-sr,.pl-sr .pl-cce,.pl-sr .pl-sra,.pl-sr .pl-sre,.pl-src,.pl-v {
+    color: #df5000;
+}
+
+.pl-id {
+    color: #b52a1d;
+}
+
+.pl-ii {
+    background-color: #b52a1d;
+    color: #f8f8f8;
+}
+
+.pl-sr .pl-cce {
+    color: #63a35c;
+    font-weight: bold;
+}
+
+.pl-ml {
+    color: #693a17;
+}
+
+.pl-mh,.pl-mh .pl-en,.pl-ms {
+    color: #1d3e81;
+    font-weight: bold;
+}
+
+.pl-mq {
+    color: #008080;
+}
+
+.pl-mi {
+    color: #333;
+    font-style: italic;
+}
+
+.pl-mb {
+    color: #333;
+    font-weight: bold;
+}
+
+.pl-md,.pl-mdhf {
+    background-color: #ffecec;
+    color: #bd2c00;
+}
+
+.pl-mdht,.pl-mi1 {
+    background-color: #eaffea;
+    color: #55a532;
+}
+
+.pl-mdr {
+    color: #795da3;
+    font-weight: bold;
+}
+
+.pl-mo {
+    color: #1d3e81;
+}
+.task-list {
+padding-left:10px;
+margin-bottom:0;
+}
+
+.task-list li {
+    margin-left: 20px;
+}
+
+.task-list-item {
+list-style-type:none;
+padding-left:10px;
+}
+
+.task-list-item label {
+font-weight:400;
+}
+
+.task-list-item.enabled label {
+cursor:pointer;
+}
+
+.task-list-item+.task-list-item {
+margin-top:3px;
+}
+
+.task-list-item-checkbox {
+display:inline-block;
+margin-left:-20px;
+margin-right:3px;
+vertical-align:1px;
+}
+</style>
+</head>
+<body>
+<h2 id="-scala-actor-">快学scala笔记——Actor,隐式转换和隐式参数</h2>
+<h3 id="actor">Actor</h3>
+<p>actor提供了并发程序中与传统的基于锁的结构不同的另一种选择。通过尽可能避免锁和共享状态，actor使得我们更能够容易的设计出正确、没有死锁或争用状况的程序。</p>
+<h4 id="-actor">创建和启动Actor</h4>
+<p><strong>actor是扩展自Actor特质的类。该特质带有一个抽象方法act。我们可以重写这个方法来指定该actor的行为</strong></p>
+<p>通常，act方法带有一个消息循环</p>
+<pre><code>import scala.actors.Actor
+
+class HiActor extends Actor {
+    def act(){
+        while (true) {
+            receive {
+                case &quot;Hi&quot; =&gt; println(&quot;Hello&quot;)
+            }
+        }
+    }
+}
+</code></pre><blockquote>
+<p>不同actor的act方法是并行运行的。</p>
+</blockquote>
+<pre><code>要启动一个actor，需要构造一个实例，并调用start方法
+val actor1 = new HiActor
+actor1.start()
+</code></pre><p>有时，我们需要临时创建actor而不是定义一个类。Actor伴生对象带有一个actor方法来创建和启动actor：</p>
+<pre><code>import scala.actors.Actor._
+
+val actor2=actor {
+    while (true) {
+            receive {
+                case &quot;Hi&quot; =&gt; println(&quot;Hello&quot;)
+            }
+        }
+}
+</code></pre><h4 id="-">发送消息</h4>
+<p>actor是一个处理异步消息的对象。向某个actor发送消息，该actor处理消息，或许还会向其他actor发送消息做进一步的处理。</p>
+<blockquote>
+<p>消息可以是任何对象</p>
+</blockquote>
+<pre><code>发送消息的操作符！
+
+actor1 ! &quot;Hi&quot;
+</code></pre><blockquote>
+<p>消息被送往该actor，当前线程继续执行，发完就忘，不等待回复</p>
+</blockquote>
+<p>使用样例类就可以用模式匹配来处理消息：</p>
+<pre><code>有一个检查信用卡诈骗的actor。我们可能会想要向它发消息说某个记账动作正在进行。以下是相应的样例类：
+
+case class Charge(creditCardNumber: Long, merchant: String, amount: Double)
+
+把该样例类的一个对象发送给actor：
+fraudControl ! Charge(4111111111111111,&quot;Fred&#39;s Bait and Tackle&quot;, 19.95)
+
+假定该actor的act方法包含一个如下形式的语句：
+receive{
+    case Charge(ccnum, merchant, amt) =&gt; ...
+}//这样记账相关的值就可以通过变量ccnum,merchant,amt分别取到
+</code></pre><h4 id="-">接收消息</h4>
+<p>发送到actor的消息被存放在一个“邮箱”中。receive方法从邮箱获取下一条消息并将它传给它的参数，该参数是一个偏函数。</p>
+<blockquote>
+<p>偏函数，只对能够匹配其中一个case语句的参数有定义。</p>
+</blockquote>
+<pre><code>receive{
+    case Deposit (amount) =&gt; ...
+    case Withdraw (amount) =&gt; ...
+}
+//receive方法的参数是{}中的内容，这个代码块被转换成一个类型为PartialFunction[Any,T]的对象，其中T是case语句=&gt;操作符右边的表达式的计算结果的类型
+//receive方法将从邮箱中收来的消息传递给这个偏函数
+</code></pre><blockquote>
+<p>消息投递过程是异步的，到达的顺序不可知。应用程序不应该依赖消息投递的顺序</p>
+<p>邮箱会串行化消息，不会出现争用状况。</p>
+<p>actor不鼓励使用共享数据，可能会出现争用。</p>
+</blockquote>
+<h4 id="-actor-">向其他Actor发送消息</h4>
+<p>当运算被分拆到不同actor来并行处理问题的各个部分时，这些处理结果需要被收集到一起。当actor计算出结果后，应该向另一个actor发送消息。</p>
+<p>下面是几种设计：<br>1.有一些全局actor，伸缩性差。<br>2.actor可以构造成带有指向一个或更多actor的引用。<br>3.actor可以接收带有指向另一个actor的引用消息。在请求中提供一个actor引用是常见的做法：</p>
+<pre><code>actor ! Compute(data, continuation)
+//这里的continuation是另一个actor，当结果被计算出来的时候应该调用该actor
+</code></pre><p>4.actor可以返回消息给发送方。receive方法会把sender字段设为当前消息的发送方。</p>
+<blockquote>
+<p>当actor握有对另一个actor的引用时，只使用这个引用来发送消息，而不是调用方法。</p>
+</blockquote>
+<h4 id="-">消息通道</h4>
+<p>使用消息通道两个好处：<br>1.消息通道是类型安全的，只能发送或接受某个特定类型的消息；<br>2.不会不小心通过消息通道调用某个actor的方法。</p>
+<blockquote>
+<p>消息通道可以是一个OutputChannel(带有！方法)，也可以是一个InputChannel(带有receive和react方法）。Channel类同时扩展OutputChannel和InputChannel特质。</p>
+</blockquote>
+<h4 id="-future">同步消息和Future</h4>
+<p>actor可以发送一个消息并等待回复，用!?操作符即可。</p>
+<pre><code>val reply = account !? Deposit(1000)
+
+reply match {
+    case Balance(bal) =&gt; println(&quot;Currnet Balance: &quot;+ bal)
+}
+
+//想要上述代码工作，接收方必须返回一个消息给发送方
+ receive {
+    case Deposit(amount) =&gt; {balance += amount; sender ! Balance(balance)}
+    //除了用sender ! Balance(balance)也可以reply(Balance(balance))
+    ...
+ }
+
+ //发送方在收到回复前会阻塞。
+</code></pre><p>如果不想对一个回复永远等待下去，可以使用receiveWithin方法来指定等待时间，单位为毫秒</p>
+<pre><code>//如果在指定时间内没有收到回复，会收到一个Acotr.TIMEOUT对象
+actor {
+    worker ! Task(data, self)
+    receiveWithin(seconds * 1000) {
+        case Result(data) =&gt; ...
+        case TIMEOUT =&gt; log(...)
+    }
+}
+</code></pre><p>还可以选择接受一个future——结果可用时产出结果，使用！！做到</p>
+<pre><code>val replyFuture = account !! Deposit(1000)
+//isSet方法会检查结果是否已经可用。接受结果：
+val reply = replyFuture()
+</code></pre><h4 id="-">共享线程</h4>
+<p>为了使用Scala提供的基于事件的Actor，使用react来替代receive即可。</p>
+<pre><code>react {
+    case Withdraw(amount) =&gt;
+    react {
+        case Confirm() =&gt; 
+          println(&quot;Confirming&quot;+amount)
+    }
+}
+</code></pre><h4 id="actor-">Actor的生命周期</h4>
+<p>actor的act方法在actor的start方法被调用时开始执行。通常，actor接下来做的事情是进入某个循环。</p>
+<p>actor在如下情形之一中止执行：<br>1.act方法返回。<br>2.act方法由于异常被终止。<br>actor因一个异常终止时，退出原因就是UncaughtException样例类的一个实例。<br>3.actor调用exit方法。   </p>
+<blockquote>
+<p>exit方法是个受保护的方法。只能被Actor的子类中调用。<br>还有一个eixt方法的重载版本可以接收一个参数描述退出原因。</p>
+</blockquote>
+<h4 id="-actor-">将多个Actor链接在一起</h4>
+<p>如果将两个actor链接在一起，则每一个都会在另一个终止执行的时候得到通知。要建立这个关联关系，以另一个actor的引用调用link方法。</p>
+<pre><code>def act() {
+    link (master)
+    ...
+}
+</code></pre><blockquote>
+<p>链接是双向的，但是link方法不是对称的，link方法必须由请求链接的actor调用。link(worker)不能用worker.link(self)代替。</p>
+</blockquote>
+<p>默认情况下，当前actor链接到的actor中有一个以非`normal原因退出，当前actor就会终止。退出原因相同。<br>可以通过设置trapExit为true来改变这个行为，修改后，actor会受到一个类型为Exit的消息，包含了正在终止actor和退出原因。</p>
+<pre><code>override def act() {
+    trapExit = true
+    link(worker)
+    while(...) {
+        receive{
+        ...
+        case Exit(linked, UncaughtException(_,_,_,_, cause)) =&gt; ...
+        case Exit(linked, reason) =&gt; ...
+        }
+    }
+}
+</code></pre><blockquote>
+<p>操作actor时，允许它们挂掉是很正常的。只需要把每个actor链接到一个“监管”actor，由它来处理失败的actor。</p>
+</blockquote>
+<h3 id="-">隐式转换和隐式参数</h3>
+<h4 id="-">隐式转换</h4>
+<p>隐式转换函数是指那种以implicit关键字声明的带有单个参数的函数。这样的函数将被自动应用，将值从一种类型转换为另一种类型。</p>
+<pre><code>//将整数n转换成分数n/1
+implicit def int2Fraction (n: Int) = Fraction(n,1)
+
+这样我们就可以进行以下操作：
+val result = 3* Fraction (4,5) //将调用int2Fraction(3)
+//隐式转换函数将整数3转换成了一个Fraction对象，接着这个对象又被乘以Fraction (4,5)
+</code></pre><h4 id="-">利用隐式转换丰富现有类库的功能</h4>
+<p>在scala中，可以定义一个经过丰富的类型，提供想要的功能，比如为File对象提供read方法。</p>
+<pre><code>class RichFile(val from: File){
+    def read = Source.fromFile(from.getPath).mkString
+}
+
+然后在提供一个隐式转换将原来的类型转换到这个新的类型：
+implicit def file2RichFile (from: File) = new RichFile(from)
+//这样就可以在File对象上调用read方法了。
+</code></pre><h4 id="-">引入隐式转换</h4>
+<p>scala会考虑如下的隐式转换函数：<br>1.位于源或目标类型的伴生对象中的隐式函数。<br>2.位于当前作用域可以以单个标识符指代的隐式函数。</p>
+<p>如果把int2Fraction函数放到了FractionConversions对象中，而这个对象位于com.horstmann.impatient包。要使用这个转换，就要引入FractionConversions对象：</p>
+<pre><code>import com.horstmann.impatient.FractionConversions._
+</code></pre><p>以下写法是不够的：</p>
+<pre><code>import com.horstmann.impatient.FractionConversions
+//只引入了FractionConversions对象本身，而int2Fraction方法只能以FractionConversions.int2Fraction的形式被显示调用。不能以int2Fraction直接访问到，不加限定词，编译器不会使用它。
+</code></pre><blockquote>
+<p>可以将引入局部化以避免不想要的转换发生。</p>
+</blockquote>
+<p>要排除某个特定的隐式转换：</p>
+<pre><code>import com.horstmann.impatient.FractionConversions.{fraction2Double =&gt; _,_}
+//引入除fraction2Double外的所有成员
+</code></pre><h4 id="-">隐式转换规则</h4>
+<p>隐式转换会在三种情况下被考虑：<br>1.当表达式的类型与预期类型不同时<br>2.当对象访问一个不存在的成员时<br>3.当对象调用某个方法，而该方法的参数声明与传入参数不匹配时。      </p>
+<p>如下三种情况下，编译器不会尝试使用隐式转换：<br>1.如果代码能在不使用隐式转换的前提下通过编译。<br>2.编译器不会尝试同时执行多个转换。<br>3.存在二义性的转换是个错误。    </p>
+<blockquote>
+<p>如果先要知道编译器使用了哪些隐式转换，可以：<br>scalac -Xprint:typer MyProg.scala<br>//可以看到加入隐式转换后的源码</p>
+</blockquote>
+<h4 id="-">隐式参数</h4>
+<p>函数或方法可以带有一个标记为implicit的参数列表。</p>
+<pre><code>case class Delimiters (left: String, right: String)
+
+def quote(what: String)(implicit delims: Delimiters) = delims.left + what + delims.right
+
+//可以调用一个显式的Delimiters对象来调用quote方法：
+quote（“Bonjour le monde”）(Delimiters(&quot;&lt;&lt;&quot;,&gt;&gt;&quot;))
+
+//也可以略去隐式参数列表
+quote（“Bonjour le monde”）
+</code></pre><p>在缺少隐式参数时，编译器会在以下两个地方查找：</p>
+<ul>
+<li>在当前作用域所有可以用单个标识符指代的满足类型要求的val和def</li><li>与所要求类型相关联的类型的伴生对象。</li></ul>
+<pre><code>在我们的示例当中，我们可以做一个对象：
+object FrenchPunctuation{
+    implicit val quoteDelimiters = Delimiters(&quot;&lt;&lt;&quot;,&quot;&gt;&gt;&quot;)
+    ...
+}
+这样我们就可以从这个对象引入所有的值：
+import FrenchPunctuation._
+或特定的值：
+import FrenchPunctuation.quoteDelimiters
+//这样，法语标点符号中的戒定福就被隐式的提供给了quote函数
+</code></pre><blockquote>
+<p>对于给定的数据类型，只能有一个隐式的值</p>
+</blockquote>
+<h4 id="-">利用隐式参数进行隐式转换</h4>
+<p>隐式的函数参数也可以被用做隐式转换。</p>
+<pre><code>def smaller[T](a:T, b:T) = if (a&lt;b) a else b //不对
+
+编译器不知道a和b属于一个带有&lt;操作符的类型
+
+通过提供转换函数可以达到目的：
+def smaller[T](a:T, b:T)(implicit order: T=&gt; Oredered[T])
+= if (order(a)&lt;b) a else b//正确
+
+order是一个带有单个参数的函数，被打上了implicit标签，并且有一个以单个标识符出现的名称。因此，它不仅是一个隐式参数，还是一个隐式转换，因此我们可以在函数体中略去对order的显式调用
+
+def smaller[T](a:T, b:T)(implicit order: T=&gt; Oredered[T])
+= if (a&lt;b) a else b
+</code></pre><blockquote>
+<p>Predef对象对大量已知类型都定义了T=&gt;Ordered[T]，因此我们可以调用smaller(40,2),smaller(&quot;Hello&quot;,&quot;World&quot;)</p>
+</blockquote>
+<h4 id="-">上下文界定</h4>
+<p>类型参数可以有一个形式为T:M的上下文界定，其中M是另一个泛型类型。它要求作用域中存在一个类型为M[T]的隐式值。</p>
+<pre><code>class Pair[T: Ordering]
+//要求存在一个类型为Ordering[T]的隐式值。
+
+class Pair[T: Ordering] (val first: T, val second: T){
+    def smaller(implicit ord: Ordering[T]) = 
+        if (ord.compare(fitst,second)&lt;0) first else second
+}
+
+//也可以利用Ordered特质中定义的从Ordering到Ordered的隐式转换。有了这个转换就可以使用关系操作符：
+class Pair[T: Ordering] (val first: T, val second: T){
+    def smaller = {
+        import Ordered._
+        if (fitst&lt;second) first else second
+    }
+}
+</code></pre><h4 id="-implicitnotfound-">@implicitNotFound注解</h4>
+<p>@implicitNotFound注解在编译器不能够给出带有该注解的类型的参数时给出错误提示。</p>
+<h3 id="-">高级类型</h3>
+<h4 id="-">自身类型</h4>
+<p>用自身类型(self type)的声明来定义特质：</p>
+<pre><code>this: 类型 =&gt;
+</code></pre><p>这样的特质只能被混入给定类型的子类当中。</p>
+<pre><code>在如下示例中，LoggedExceptiong特质只能被混入扩展自Exception的类：
+trait Logged {
+    def log(msg: String)
+}
+
+trait LoggedException extends Logged {
+    this: Exception =&gt;
+    def log() { log(getMessage())}
+    //可以调用getMessage,因为this是一个Exception
+}
+
+如果尝试将该特质混入不符合自身类型所要求的类，就会报错：
+
+val f = new JFrame with LoggedException
+//错误：JFrame不是LoggedException的自身类型Exception的子类型
+
+如果想要提出多个类型要求，可以用复合类型：
+this : T with  with ... =&gt;
+</code></pre><h4 id="-">依赖注入</h4>
+<p>在通过组件构建大型系统，而每个组件都有不同实现的时候，我们需要将组件的不同选择组装起来。</p>
+<p>在scala中，你可以通过特质和自身类型达到一个简单的依赖注入的效果。</p>
+<p>蛋糕模式：对每个服务都提供一个组件特质，该特质包括：</p>
+<ul>
+<li>任何所依赖的组件，以自身类型表述</li><li>描述服务接口的特质。</li><li>一个抽象的val，该val将被初始化成服务的一个实例。</li><li>可以有选择性的包含服务接口的实现。</li></ul>
+<pre><code>trait LoggerComponent {
+    trait Logger {...}
+    val logger: Logger
+    class FileLogger (file: String) extends Logger {...}
+    ...
+}
+
+trait AuthComponent {
+    this: LoggerComponent =&gt; //让我们可以访问日志器
+
+    trait Auth {...}
+    val auth: Auth
+    class MockAuth(file: String) extends Auth {...}
+    ...
+}
+
+这段代码用来表明认证组件依赖日志器组件
+这样，组件配置就可以在一个地方集中完成：
+object AppComponents extends LoggerComponent with AuthComponent {
+    val logger = new FileLogger(&quot;test.log&quot;)
+    val auth = new MockAuth(&quot;users.txt&quot;)
+}
+</code></pre>
+</body>
+</html>
+<!-- This document was created with MarkdownPad, the Markdown editor for Windows (http://markdownpad.com) -->

@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Scala高阶函数和模式匹配</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+/* GitHub stylesheet for MarkdownPad (http://markdownpad.com) */
+/* Author: Nicolas Hery - http://nicolashery.com */
+/* Version: b13fe65ca28d2e568c6ed5d7f06581183df8f2ff */
+/* Source: https://github.com/nicolahery/markdownpad-github */
+
+/* RESET
+=============================================================================*/
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* BODY
+=============================================================================*/
+
+body {
+  font-family: Helvetica, arial, freesans, clean, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  background-color: #fff;
+  padding: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+body>*:first-child {
+  margin-top: 0 !important;
+}
+
+body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* BLOCKS
+=============================================================================*/
+
+p, blockquote, ul, ol, dl, table, pre {
+  margin: 15px 0;
+}
+
+/* HEADERS
+=============================================================================*/
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 20px 0 10px;
+  padding: 0;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 tt, h1 code, h2 tt, h2 code, h3 tt, h3 code, h4 tt, h4 code, h5 tt, h5 code, h6 tt, h6 code {
+  font-size: inherit;
+}
+
+h1 {
+  font-size: 28px;
+  color: #000;
+}
+
+h2 {
+  font-size: 24px;
+  border-bottom: 1px solid #ccc;
+  color: #000;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+h4 {
+  font-size: 16px;
+}
+
+h5 {
+  font-size: 14px;
+}
+
+h6 {
+  color: #777;
+  font-size: 14px;
+}
+
+body>h2:first-child, body>h1:first-child, body>h1:first-child+h2, body>h3:first-child, body>h4:first-child, body>h5:first-child, body>h6:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+h1+p, h2+p, h3+p, h4+p, h5+p, h6+p {
+  margin-top: 10px;
+}
+
+/* LINKS
+=============================================================================*/
+
+a {
+  color: #4183C4;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* LISTS
+=============================================================================*/
+
+ul, ol {
+  padding-left: 30px;
+}
+
+ul li > :first-child, 
+ol li > :first-child, 
+ul li ul:first-of-type, 
+ol li ol:first-of-type, 
+ul li ol:first-of-type, 
+ol li ul:first-of-type {
+  margin-top: 0px;
+}
+
+ul ul, ul ol, ol ol, ol ul {
+  margin-bottom: 0;
+}
+
+dl {
+  padding: 0;
+}
+
+dl dt {
+  font-size: 14px;
+  font-weight: bold;
+  font-style: italic;
+  padding: 0;
+  margin: 15px 0 5px;
+}
+
+dl dt:first-child {
+  padding: 0;
+}
+
+dl dt>:first-child {
+  margin-top: 0px;
+}
+
+dl dt>:last-child {
+  margin-bottom: 0px;
+}
+
+dl dd {
+  margin: 0 0 15px;
+  padding: 0 15px;
+}
+
+dl dd>:first-child {
+  margin-top: 0px;
+}
+
+dl dd>:last-child {
+  margin-bottom: 0px;
+}
+
+/* CODE
+=============================================================================*/
+
+pre, code, tt {
+  font-size: 12px;
+  font-family: Consolas, "Liberation Mono", Courier, monospace;
+}
+
+code, tt {
+  margin: 0 0px;
+  padding: 0px 0px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+}
+
+pre>code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent;
+}
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px;
+}
+
+pre code, pre tt {
+  background-color: transparent;
+  border: none;
+}
+
+kbd {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #DDDDDD;
+    background-image: linear-gradient(#F1F1F1, #DDDDDD);
+    background-repeat: repeat-x;
+    border-color: #DDDDDD #CCCCCC #CCCCCC #DDDDDD;
+    border-image: none;
+    border-radius: 2px 2px 2px 2px;
+    border-style: solid;
+    border-width: 1px;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    line-height: 10px;
+    padding: 1px 4px;
+}
+
+/* QUOTES
+=============================================================================*/
+
+blockquote {
+  border-left: 4px solid #DDD;
+  padding: 0 15px;
+  color: #777;
+}
+
+blockquote>:first-child {
+  margin-top: 0px;
+}
+
+blockquote>:last-child {
+  margin-bottom: 0px;
+}
+
+/* HORIZONTAL RULES
+=============================================================================*/
+
+hr {
+  clear: both;
+  margin: 15px 0;
+  height: 0px;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  border-bottom: 4px solid #ddd;
+  padding: 0;
+}
+
+/* TABLES
+=============================================================================*/
+
+table th {
+  font-weight: bold;
+}
+
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 6px 13px;
+}
+
+table tr {
+  border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+table tr:nth-child(2n) {
+  background-color: #f8f8f8;
+}
+
+/* IMAGES
+=============================================================================*/
+
+img {
+  max-width: 100%
+}
+</style>
+<style type="text/css">
+.highlight  { background: #ffffff; }
+.highlight .c { color: #999988; font-style: italic } /* Comment */
+.highlight .err { color: #a61717; background-color: #e3d2d2 } /* Error */
+.highlight .k { font-weight: bold } /* Keyword */
+.highlight .o { font-weight: bold } /* Operator */
+.highlight .cm { color: #999988; font-style: italic } /* Comment.Multiline */
+.highlight .cp { color: #999999; font-weight: bold } /* Comment.Preproc */
+.highlight .c1 { color: #999988; font-style: italic } /* Comment.Single */
+.highlight .cs { color: #999999; font-weight: bold; font-style: italic } /* Comment.Special */
+.highlight .gd { color: #000000; background-color: #ffdddd } /* Generic.Deleted */
+.highlight .gd .x { color: #000000; background-color: #ffaaaa } /* Generic.Deleted.Specific */
+.highlight .ge { font-style: italic } /* Generic.Emph */
+.highlight .gr { color: #aa0000 } /* Generic.Error */
+.highlight .gh { color: #999999 } /* Generic.Heading */
+.highlight .gi { color: #000000; background-color: #ddffdd } /* Generic.Inserted */
+.highlight .gi .x { color: #000000; background-color: #aaffaa } /* Generic.Inserted.Specific */
+.highlight .go { color: #888888 } /* Generic.Output */
+.highlight .gp { color: #555555 } /* Generic.Prompt */
+.highlight .gs { font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #aaaaaa } /* Generic.Subheading */
+.highlight .gt { color: #aa0000 } /* Generic.Traceback */
+.highlight .kc { font-weight: bold } /* Keyword.Constant */
+.highlight .kd { font-weight: bold } /* Keyword.Declaration */
+.highlight .kp { font-weight: bold } /* Keyword.Pseudo */
+.highlight .kr { font-weight: bold } /* Keyword.Reserved */
+.highlight .kt { color: #445588; font-weight: bold } /* Keyword.Type */
+.highlight .m { color: #009999 } /* Literal.Number */
+.highlight .s { color: #d14 } /* Literal.String */
+.highlight .na { color: #008080 } /* Name.Attribute */
+.highlight .nb { color: #0086B3 } /* Name.Builtin */
+.highlight .nc { color: #445588; font-weight: bold } /* Name.Class */
+.highlight .no { color: #008080 } /* Name.Constant */
+.highlight .ni { color: #800080 } /* Name.Entity */
+.highlight .ne { color: #990000; font-weight: bold } /* Name.Exception */
+.highlight .nf { color: #990000; font-weight: bold } /* Name.Function */
+.highlight .nn { color: #555555 } /* Name.Namespace */
+.highlight .nt { color: #000080 } /* Name.Tag */
+.highlight .nv { color: #008080 } /* Name.Variable */
+.highlight .ow { font-weight: bold } /* Operator.Word */
+.highlight .w { color: #bbbbbb } /* Text.Whitespace */
+.highlight .mf { color: #009999 } /* Literal.Number.Float */
+.highlight .mh { color: #009999 } /* Literal.Number.Hex */
+.highlight .mi { color: #009999 } /* Literal.Number.Integer */
+.highlight .mo { color: #009999 } /* Literal.Number.Oct */
+.highlight .sb { color: #d14 } /* Literal.String.Backtick */
+.highlight .sc { color: #d14 } /* Literal.String.Char */
+.highlight .sd { color: #d14 } /* Literal.String.Doc */
+.highlight .s2 { color: #d14 } /* Literal.String.Double */
+.highlight .se { color: #d14 } /* Literal.String.Escape */
+.highlight .sh { color: #d14 } /* Literal.String.Heredoc */
+.highlight .si { color: #d14 } /* Literal.String.Interpol */
+.highlight .sx { color: #d14 } /* Literal.String.Other */
+.highlight .sr { color: #009926 } /* Literal.String.Regex */
+.highlight .s1 { color: #d14 } /* Literal.String.Single */
+.highlight .ss { color: #990073 } /* Literal.String.Symbol */
+.highlight .bp { color: #999999 } /* Name.Builtin.Pseudo */
+.highlight .vc { color: #008080 } /* Name.Variable.Class */
+.highlight .vg { color: #008080 } /* Name.Variable.Global */
+.highlight .vi { color: #008080 } /* Name.Variable.Instance */
+.highlight .il { color: #009999 } /* Literal.Number.Integer.Long */
+.pl-c {
+    color: #969896;
+}
+
+.pl-c1,.pl-mdh,.pl-mm,.pl-mp,.pl-mr,.pl-s1 .pl-v,.pl-s3,.pl-sc,.pl-sv {
+    color: #0086b3;
+}
+
+.pl-e,.pl-en {
+    color: #795da3;
+}
+
+.pl-s1 .pl-s2,.pl-smi,.pl-smp,.pl-stj,.pl-vo,.pl-vpf {
+    color: #333;
+}
+
+.pl-ent {
+    color: #63a35c;
+}
+
+.pl-k,.pl-s,.pl-st {
+    color: #a71d5d;
+}
+
+.pl-pds,.pl-s1,.pl-s1 .pl-pse .pl-s2,.pl-sr,.pl-sr .pl-cce,.pl-sr .pl-sra,.pl-sr .pl-sre,.pl-src,.pl-v {
+    color: #df5000;
+}
+
+.pl-id {
+    color: #b52a1d;
+}
+
+.pl-ii {
+    background-color: #b52a1d;
+    color: #f8f8f8;
+}
+
+.pl-sr .pl-cce {
+    color: #63a35c;
+    font-weight: bold;
+}
+
+.pl-ml {
+    color: #693a17;
+}
+
+.pl-mh,.pl-mh .pl-en,.pl-ms {
+    color: #1d3e81;
+    font-weight: bold;
+}
+
+.pl-mq {
+    color: #008080;
+}
+
+.pl-mi {
+    color: #333;
+    font-style: italic;
+}
+
+.pl-mb {
+    color: #333;
+    font-weight: bold;
+}
+
+.pl-md,.pl-mdhf {
+    background-color: #ffecec;
+    color: #bd2c00;
+}
+
+.pl-mdht,.pl-mi1 {
+    background-color: #eaffea;
+    color: #55a532;
+}
+
+.pl-mdr {
+    color: #795da3;
+    font-weight: bold;
+}
+
+.pl-mo {
+    color: #1d3e81;
+}
+.task-list {
+padding-left:10px;
+margin-bottom:0;
+}
+
+.task-list li {
+    margin-left: 20px;
+}
+
+.task-list-item {
+list-style-type:none;
+padding-left:10px;
+}
+
+.task-list-item label {
+font-weight:400;
+}
+
+.task-list-item.enabled label {
+cursor:pointer;
+}
+
+.task-list-item+.task-list-item {
+margin-top:3px;
+}
+
+.task-list-item-checkbox {
+display:inline-block;
+margin-left:-20px;
+margin-right:3px;
+vertical-align:1px;
+}
+</style>
+</head>
+<body>
+<h1 id="scala-">Scala中的高阶函数和模式匹配</h1>
+<p>上次没有说清楚的几个问题：</p>
+<p>1.匿名类</p>
+<p>匿名类是不能有名字的类，它们不能被引用，只能在创建时用New语句来声明它们。匿名类的声明是在编译时进行的，实例化在运行时进行，这意味着for循环中的一个new语句会创建相同匿名类的几个实例，而不是创建几个不同匿名类的一个实例。</p>
+<p>匿名类的目的是在某个地方需要特殊的实现。因此在该处编写其实现，并获取它的实例，调用它的方法。</p>
+<pre><code>new&lt;类或接口&gt;&lt;类的主体&gt;
+</code></pre><p>网上资料比较少。。。</p>
+<p>2.验证特质是否能扩展类，是否可以通过加一个特质的方式实现多继承</p>
+<p>trait extends class是可以的</p>
+<pre><code>class Ori1{
+  def testOri1(){println(1)}
+  def testOri2(){println(1)}
+}
+class Ori2{
+  def testOri1(){println(2)}
+  def testOri2(){println(2)}
+}
+class Aim extends Ori1 with temp{
+  override def testOri1(){}
+  override def testOri2(){}
+}
+
+trait temp extends Ori2{//用来中转的特质
+  override def testOri1(){println(3)}
+  override def testOri2(){println(3)}
+}
+</code></pre><p>不行，要求后面的必须是父类</p>
+<pre><code>Error:(10, 29) illegal inheritance; superclass Ori1
+ is not a subclass of the superclass Ori2
+ of the mixin trait temp
+class Aim extends Ori1 with temp{
+                            ^
+</code></pre><p>3.apply和unapply</p>
+<blockquote>
+<p>一个带有unapply方法的对象成为提取器。可以把unapply方法当作是伴生对象中apply方法的反向操作。apply犯法接收构造参数，然后将它们变成对象。而unapply方法接收一个对象，然后从中提取值。</p>
+<p>在模式匹配中，应用unapply可能会失败，因此unapply方法返回的是一个Option。它包含一个元组，每个匹配到的变量各有一个值与之对应。<br>例如</p>
+</blockquote>
+<pre><code>object Name{
+    def unapply(input:String)={
+        val pos = input.indexOf(&quot; &quot;)
+        if(pos == -1) None
+        else Some((input.substring(0,pos),input.substring(pos + 1)))
+    }
+}
+</code></pre><p>每一个样例类都自动具备apply和unapply方法，构造实例时</p>
+<pre><code>Currency(29.95,&quot;EUR&quot;)//调用Currency.apply
+</code></pre><p>模式匹配时</p>
+<pre><code>case Currency(amount, &quot;USD&quot;) =&gt; println(&quot;$&quot; + amount)//调用Currency.unapply
+</code></pre><p>要提取任意长度的序列，应该用unapplyseq命名方法。它返回一个Option[Seq[A]]，其中A是被提取的值的类型。举例来说，Name提取器可以产出名字中所有组成部分的序列：</p>
+<pre><code>object Name{
+    def unapplySeq(input:String):Option[Seq[String]]=
+        if(input.trim == &quot;&quot;) None
+        else Some(input.trim.split(&quot;\\s+&quot;))
+}
+</code></pre><p>这样就可以匹配并取到任意数量的变量了</p>
+<pre><code>author match{
+    case Name(first, last) =&gt; ...
+    case Name(first, middle, last) =&gt; ...
+    case Name(first, &quot;van&quot;, &quot;der&quot;, last) =&gt; ...
+    ...
+}
+</code></pre><p>4.特质叠加例子执行顺序</p>
+<p>添加时间戳的类</p>
+<pre><code>trait TimestampLogger extends Logged{
+    override def log(msg: String){
+        super.log(new java.util.Data() + &quot; &quot; +msg)
+    }
+}
+</code></pre><p>截断过长信息</p>
+<pre><code>trait ShortLogger extends Logged{
+    val maxLength = 15
+    override def log(msg: String){
+        super.log( if(msg.length &lt;= maxLength)) msg else mse.substring(0, maxLength-3) + &quot;...&quot;
+    }
+}
+</code></pre><p>在上面的例子中，每一个log方法都将修改过的消息传递给super.log，对特质而言，super.log的含义与类不同，super.log调用的是特质层级中的下一个特质，一般来说，特质从最后一个开始被处理。</p>
+<p>举例</p>
+<pre><code>val acct1 = new SavingsAccount with ConsoleLogger with TimestampLogger with ShortLogger
+
+val  acct2 = new SavingsAccount with ConsoleLogger with ShortLogger with TimestampLogger
+</code></pre><p>从acc1中得到的消息为</p>
+<pre><code>Sun Feb 06 17：45：45 ICT 2011 Insufficient...
+</code></pre><p>ShortLogger的log方法首先被执行，然后它的super.log调用的是TimestampLogger（这个调用层级没有太看懂）；而从acct2取款时输出的是</p>
+<pre><code>Sun Feb 06 1...
+</code></pre><p>其中TimestampLogger在特质列表中最后出现，log方法首先被调用，结果在之后被截断。</p>
+<p>5.函数和方法的区别</p>
+<p>Scala除了方法，还支持函数。方法对对象进行操作，函数不是。</p>
+<p>1.方法可以作为一个表达式的一部分出现（调用函数并传参），但是方法（有参）不能作为最终的表达式；但是函数可以作为最终的表达式出现。</p>
+<p>2.参数列表对于方法是可选的，但是对于函数是强制的</p>
+<p>3.在实际使用时，如果期望出现函数的地方提供了一个方法，该方法就会自动被转换成函数</p>
+<p>4.通过在方法名后面加一个下划线可以将其强制变成函数</p>
+<p>5.传名参数是一个方法。传名参数实际上是一个没有参数列表的方法。因此可以使用名字调用而不用添加()</p>
+<pre><code>def m1(x: =&gt; Int) = List(x,x)
+</code></pre><blockquote>
+<p>传名参数的形式，即“名称：=&gt; Unit”的格式，本来无参的函数我们也可以写成“名称：( ) =&gt; Unit”的格式</p>
+</blockquote>
+<hr>
+<h2 id="-">高阶函数</h2>
+<ul>
+<li>作为值的函数</li></ul>
+<p>在scala中，函数和数字一样，可以在变量中存放</p>
+<pre><code>import scala.math._
+val num = 3.14
+val fun = ceil _
+</code></pre><p>上面的代码将num设为3.14，fun设为ceil函数</p>
+<p>ceil函数后的 <em>意味着确实指的是这个函数，而不是碰巧忘记了给他送参数（实际上是 </em>将ceil方法转成了函数，在scala中，无法直接操纵方法，而只能直接操纵函数）</p>
+<p>此时fun的类型是(Double)=&gt;Double，即接受并返回Double的参数</p>
+<p>在Scala中，函数可以被调用也可以作为参数传递给另一个函数</p>
+<pre><code>Array(3.14,1.42,2.0).map(fun)//将函数fun()传递给另一个函数
+</code></pre><p>map方法接受一个函数参数，将它应用到数组中对所有值，然后返回结果数组</p>
+<ul>
+<li>匿名函数</li></ul>
+<p>在Scala中，不需要给每一个函数命名</p>
+<pre><code>(x: Double) =&gt; 3*x
+</code></pre><p>可以将这个函数存放到变量中:</p>
+<pre><code>val triple = (x: Double) =&gt; 3*x
+</code></pre><p>等同于用def</p>
+<pre><code>def triple(x: Double) =&gt; 3*x
+</code></pre><p>将匿名函数传递给另一个函数</p>
+<pre><code>Array(3.14,1.42,2.0).map((x: Double) =&gt; 3*x)//Array(9.42,4.26,6.0)
+</code></pre><ul>
+<li>带函数参数的函数</li></ul>
+<p>实现接受另一个函数作为形参的函数</p>
+<pre><code>def valueAtOneQuaarter(f: (Double) =&gt; Double)=f(0.25)
+</code></pre><p>这里的参数可以是任何接受Double并返回Double的函数。valueAtOneQuarter函数将计算那个函数在0.25位置的值</p>
+<pre><code>valueAtOnequarter(ceil _)//1.0
+valueAtOneQUarter(sqrt _)//0.5
+</code></pre><p>valueAtOneQuarter的类型为((Double)=&gt;Double)=&gt;Double</p>
+<p><strong>由于valueAtOneQuarter是一个接受函数参数的函数，因此它被称作高阶函数</strong></p>
+<p>高阶函数的返回值也可以是另一个函数</p>
+<pre><code>def mulBy(factor: Double) = (x:Double) =&gt; factor*x
+</code></pre><p>mulBy返回函数(x: Double)=&gt;3*x，用法</p>
+<pre><code>val quintuple = mulBy(5)
+quintuple(20)//100
+</code></pre><p>mulBy函数有一个类型为Double的参数，返回一个类型为(Double)=&gt;Double,因此类型为(Double)=&gt;((Double)=&gt;Double)</p>
+<ul>
+<li>参数（类型）推断</li></ul>
+<p>当将一个<strong>匿名函数</strong>传递给另一个函数或方法时，Scala会尽可能推断出类型信息，因此在有了valueAtOneQuarter的类型以后，可以将代码</p>
+<pre><code>valueAtOneQuarter((x:Double)=&gt;3*x)
+</code></pre><p>简写为</p>
+<pre><code>valueAtOneQuarter(x=&gt;3*x)
+</code></pre><p>这样当参数在=&gt;右侧只出现一次，可以用_替换掉它：</p>
+<pre><code>valueAtOneQuarter(3*_)
+</code></pre><p>下面的写法仅在参数类型已知的情况下有效</p>
+<pre><code>val fun = 3* _//错误：无法推断出类型
+val fun = 3*(_:Double)//OK
+val fun: (Double)=&gt;Double = 3*_//OK，因为给出了fun的类型
+</code></pre><ul>
+<li>一些有用的高阶函数</li></ul>
+<p>Scala集合库中的一些常用的接受函数参数的方法</p>
+<p>1.map和foreach</p>
+<p>快速产生一个包含0.1，0.2，。。。，0.9集合的方式</p>
+<pre><code>(1 to 9).map(0.1* _)
+</code></pre><p>打印一个三角形</p>
+<pre><code>(1 to 9).map(&quot;*&quot; * _).foreach(println)
+</code></pre><p>其中foreach是将传入的函数应用的每个方法中，但是不返回值</p>
+<p>2.filter<br>输出所有匹配某个特定条件的元素</p>
+<pre><code>(1 to 9).filter(_%2==0)//2,4,6,8
+</code></pre><p>得到一个序列中的所有偶数</p>
+<p>3.reduceLeft<br>接受一个二元的函数（即一个带有两个参数的函数），并将它应用到序列中到所有元素，从左到右</p>
+<pre><code>(1 to 9).reduceLeft(_*_)
+</code></pre><p>等同于(((((1 <em> 2) </em> 3) <em> 4) </em> 5) * 6)...</p>
+<p>4.sortWith</p>
+<pre><code>&quot;Mary has a little lamb&quot;.split(&quot; &quot;).sortWith(_.length &lt;_.length)
+</code></pre><p>输出一个按长度递增排序等数组</p>
+<pre><code>Array(&quot;a&quot;,&quot;had&quot;,&quot;Mary&quot;,&quot;lamb&quot;,&quot;little&quot;)
+</code></pre><ul>
+<li>闭包</li></ul>
+<p>首先，闭包是一个函数，其次，闭包是有权访问另一个函数作用域中的变量的函数</p>
+<p>“An object is data with functions. A closure is a function with data.” — John D. Cook</p>
+<ul>
+<li><a href="http://www.tuicool.com/articles/mEJviy">柯里化</a></li></ul>
+<p>指将原来接受两个参数的函数变成新的接受一个参数的函数的过程。新的函数返回一个以原有第二个参数作为参数的函数</p>
+<pre><code>def add = (x:Int)=&gt;(y:Int)=&gt;(z:Int)=&gt;x+y+z
+</code></pre><p>等同于</p>
+<pre><code>def add(x:Int)(y:Int)(z:Int) = x+y+z
+</code></pre><p>即 def函数名(参数1：类型1)...(参数n：类型n)=E等同于def函数名(参数1：类型1)=（参数2：类型2）=&gt;...(参数n：类型n)=&gt;E</p>
+<p>一个接受两个参数的函数</p>
+<pre><code>def mul(x: Int, y: Int) = x*y
+</code></pre><p>以下函数接受一个参数，生成另一个接受单个参数的函数：</p>
+<pre><code>def mulOneAtATime(x: Int) = (y: Int) =&gt; x*y
+</code></pre><p>要计算两个数的乘积，需要调用</p>
+<pre><code>mulOneAtTime(6)(7)
+</code></pre><p>mulOneAtTime(6)的结果是函数(y:Int)=&gt;6*y。而这个函数又被应用到7，因此最终得到42</p>
+<p>Scala定义如下的柯里化函数</p>
+<pre><code>def mulOneAtATime(x: Int)(y: Int) = x*y
+</code></pre><p>使用柯里化可以把某个函数参数单个拿出来，以提供更多用于类型<br>推断的信息</p>
+<p>corresponds方法可以比较两个序列是否在某个对比条件下相同。例如：</p>
+<pre><code>val a = Array(&quot;Hello&quot;, &quot;World&quot;)
+val b = Array(&quot;hello&quot;, &quot;world&quot;)
+a.corresponds(b)(_.equalsIgnoreCase(_))
+</code></pre><p>其中函数<em>.equalsIgnoreCase(</em>)是以一个经过柯里化的参数的形式传递，Scaladoc中声明如下</p>
+<pre><code>def corresponds[B](that: Seq[B])(p:(A,B)=&gt;Boolean):Boolean//函数名后面加中括号表示什么
+</code></pre><p>在这里，that序列和前提函数p是分开的两个柯里化的参数。类型推断器可以分析出B出自that的类型，因此就可以利用这个信息分析作为参数p传入的参数。</p>
+<p>本例中that是一个String类型的序列。因此，前提函数应有的类型为(String,String)=&gt;Boolean。有了这个信息，编译器就可以接受.eaualsIgnoreCase(_)作为(a:String, b:String)=&gt;a.equalsIgnoreCase(b)的简写了。</p>
+<p><a href="http://www.tuicool.com/articles/NNnmyiE">柯里化应用场景</a></p>
+<ul>
+<li>控制抽象</li></ul>
+<p>在Scala中，可以将一系列语句归组成不带参数也没有返回值的函数。举例来说，如下函数在线程中执行某段代码：</p>
+<pre><code>def runInThread(block: () =&gt; Unit){
+    new Thread{
+        override def run(){
+            block()
+        }
+    }.start
+}
+</code></pre><p>这段代码以类型为()=&gt;Unit的函数形式给出。不过，当调用该函数的时候，需要写()=&gt;:</p>
+<pre><code>runInThread{() =&gt; println(&quot;Hi&quot;);Thread.sleep(10000);println(&quot;Bye&quot;)}
+</code></pre><p>使用换名调用表示法(在参数声明和调用改函数参数的地方略去())，但保留=&gt;:</p>
+<pre><code>def runInThread(block:=&gt;Unit){
+    new Thread{
+        override def run(){block}
+    }.start
+}
+</code></pre><p>则调用方式变为</p>
+<pre><code>runInThread{println(&quot;Hi&quot;);Thread.sleep(10000);println(&quot;Bye&quot;)}
+</code></pre><p>同时Scala还可以构建控制抽象，定义一个until语句，工作原理类似while，</p>
+<pre><code>def until(condition: =&gt; Boolean)(block: =&gt; Unit){//冒号后面有空格！
+    if(!condition){
+        block
+        until(condition)(block)
+    }
+}
+</code></pre><p>使用方法如下</p>
+<pre><code>var x = 10
+until(x == 0){
+    x -= 1
+    println(x)
+}
+</code></pre><p>这样的函数参数叫做换名调用参数。和一个常规的参数不同，函数在被调用时，参数表达式不会被求值。在调用until时，不希望x==0被求值得到false。与之相反，表达式成为无参函数的函数体，而该函数被当作参数传递下去。</p>
+<p>until函数是柯里化的，函数首先处理掉condition，然后把block当作完全独立的另一个参数。</p>
+<ul>
+<li>return表达式</li></ul>
+<p>在Scala中，不需要用return语句来返回函数值。函数的返回值就是函数体的值。</p>
+<p>但是对于匿名函数可以用return从函数中返回值给包含这个匿名函数的带名参数。如下函数</p>
+<pre><code>def indexOf(str: String, ch: Char): Int = {
+    var i = 0
+    until(i == str.length){
+        if(str(i)==ch) return i
+        i += 1
+    }
+    return -1
+}
+</code></pre><p>在这里，匿名函数{if(str(i)==ch) return i; i += 1}被传递给until。当return表达式被执行时，包含它的带名函数indexOf终止病返回给定的值</p>
+<p>如果要在带名函数中使用return的话，则需要给出其返回类型。在上例中，编译器没法推断出它会返回Int</p>
+<h2 id="-">模式匹配</h2>
+<ul>
+<li>switch语句</li></ul>
+<p>Scala中的switch等效代码：</p>
+<pre><code>var sign = ...
+var ch: Char = ...
+
+ch match {
+    case &#39;+&#39; =&gt; sign = 1
+    case &#39;-&#39; =&gt; sign = -1
+    case _ =&gt; sign = 0
+}
+</code></pre><p>与default等效的是捕获所有的case_模式。如果没有模式能匹配，代码会抛出MatchError</p>
+<p>与其他语言的switch语句不同，在每个switch分支后不需要加入break</p>
+<p>与if类似，match也是表达式，而不是语句，因此可以写成</p>
+<pre><code>sign = ch match{
+    case &#39;+&#39; =&gt; 1
+    case &#39;-&#39; =&gt; -1
+    case _ =&gt; 0
+}
+</code></pre><p>也可以在表达式中使用除数字外的其他类型，同时可以在switch中添加守卫（即if语句）</p>
+<ul>
+<li>模式中的变量</li></ul>
+<p>如果case关键字后面跟着一个变量名，那么匹配的表达式会被赋值给那个变量</p>
+<pre><code>str(i) match {
+    case &#39;+&#39; =&gt; sign = 1
+    case &#39;-&#39; =&gt; sign = -1
+    case ch =&gt; digit = Character.digit(ch, 10)
+}
+</code></pre><p>case<em>也可以被看作是这个特性的一个特殊情况，只不过变量名是 </em></p>
+<p>在守卫中也可以使用变量</p>
+<pre><code>str(i) match{
+    case ch if Character.isDigit(ch) =&gt; digit = Character.digit(ch, 10)
+    ...
+}
+</code></pre><ul>
+<li>类型模式</li></ul>
+<p>可以对表达式的类型进行匹配</p>
+<pre><code>obj match{
+    case x: Int=&gt;x
+    case s: String =&gt; Integer.parseInt(s)
+    case_: BigInt =&gt; Int.MaxValue
+    case _ =&gt; 0
+}
+</code></pre><p>第一个模式中，匹配到的值被当作Int绑到x；在第二个模式中，值被当作String绑到s。</p>
+<p>在Scala中，这种模式匹配比isInstanceOf和asInstanceOf操作符更常见</p>
+<ul>
+<li>匹配数组、列表和元组</li></ul>
+<p>要匹配数组的内容，可以在模式中使用Array表达式</p>
+<pre><code>arr match{
+    case Array(0) =&gt; &quot;0&quot;
+    case Array(x, y) =&gt; x + &quot; &quot; + y
+    case Array(0, _*) =&gt; &quot;0 ...&quot;
+    case _=&gt;&quot;something else&quot;
+}
+</code></pre><p>第一个模式匹配包含0的数组。第二个模式匹配任何带有两个元素的数组，并将着两个元素分别绑定到变量x和变量y。第三个表达式匹配任何以0开始的数组。</p>
+<p>匹配列表</p>
+<pre><code>lst match{
+    case 0 :: Nil =&gt; &quot;0&quot;
+    case x :: y :: Nil =&gt; x + &quot; &quot; + y
+    case 0 :: tail =&gt; &quot;0 ...&quot;
+    case _ =&gt; &quot;something else&quot;
+}
+</code></pre><p>对于元组，可以在模式中使用元组表示法</p>
+<pre><code>pair match{
+    case(0, _) =&gt; &quot;0 ...&quot;
+    case(y,0) =&gt; y + &quot; 0&quot;
+    case _ =&gt; &quot;neither is 0&quot;
+}
+</code></pre><p>由于这种绑定可以轻松访问复杂结构的各组成部分，因此这样的操作被称为“析构”</p>
+<ul>
+<li>提取器（抽取）扩展</li></ul>
+<p>提取器就是一个带有unapply方法的对象。可以把unapply方法当作是伴生对象中apply方法的反向操作。apply方法接收构造参数，然后将它们变成对象。而unapply方法接收一个对象，然后从中提取值。<br>提取器机制－带有从对象中提取值的unapply或unapplySeq方法的对象。unapply方法用于提取固定数量的对象；unapplySeq提取的是一个序列，可长可短</p>
+<pre><code>arr match{
+    case Array(0,x) =&gt; ...
+}
+</code></pre><p>Array伴生对象就是一个提取器－它定义了一个unapplySeq方法。该方法被调用时，用以被执行匹配动作的表达式作为参数，而不是模式中看上去像是参数的表达式Array.unapplySeq(arr)产出一个序列的值，即数组中的值。第一个值与零进行比较，而第二个值被赋值给x。</p>
+<p>正则表达式是另一个使用提取器的场景。如果正则表达式有分组，则可以用提取器来匹配每个分组</p>
+<pre><code>val pattern = &quot;([0-9] + ) ([a-z]+)&quot;._r
+&quot;99 bottles&quot; match{
+    case pattern(num,item) =&gt; ...
+    //将num设为&quot;99&quot;，item设为“bottles”
+}
+</code></pre><p>pattern.unapplySeq(&quot;99 bottles&quot;)产出一系列匹配分组的字符串。这些字符串被分别赋值给了变量num和item。这里提取器并非是一个伴生对象，而是一个正则表达式对象。</p>
+<ul>
+<li>变量声明中的模式</li></ul>
+<p>模式是可以带变量的。也可以在变量声明中使用这样的模式</p>
+<pre><code>val(x,y) = (1,2)
+</code></pre><p>同时把x定义为1，y定义为2.</p>
+<pre><code>val(q,r) = BigInt(10)/%3
+</code></pre><p>/%方法返回包含商和余数的对偶，而这两个值分别被变量q和r捕获到，同样的语法也可以用于任何带有变量的模式。如</p>
+<pre><code>val Array(first,second, _*) = arr
+</code></pre><p>上述代码将数组arr的第一个和第二个元素分别赋值给first和second</p>
+<ul>
+<li>for表达式中的模式</li></ul>
+<p>可以在for推导式中使用带变量的模式。对每一个遍历到的值，这些变量都会被绑定。</p>
+<pre><code>import scala.collection.JavaConversions.propertiesAsScalaMap//将Java的Properties转换程Scala映射
+
+    for((k,v) &lt;- System.getProperties())
+        println(k + &quot;-&gt;&quot; + v)
+</code></pre><p>对映射中的每一个（键，值）对偶，k被绑定到键，v被绑定到值</p>
+<p>在for推导式中，失败的匹配将被忽略</p>
+<pre><code>for((k, &quot;&quot;) &lt;- System.getProperties())
+    println(k)
+</code></pre><p>也可以使用守卫</p>
+<pre><code>for((k,v) &lt;- System.getProperties() if v == &quot;&quot;)
+    println(k)
+</code></pre><ul>
+<li>样例类</li></ul>
+<p>样例类是一种特殊的类，它们经过优化以被用于模式匹配。</p>
+<pre><code>abstract class Amount
+case class Dollar(value:Double) extends Amount
+case class Currency(value: Double,unit: String) extends Amount//后面用到
+</code></pre><p>也可以有针对单例的样例对象</p>
+<pre><code>case object Nothing extends Amount
+</code></pre><p>当有一个类型为Amount的对象时，可以用模式匹配来匹配到它的类型，并将属性值绑定到变量：</p>
+<pre><code>amt match{
+    case Dollar(v) =&gt; &quot;$&quot; + v
+    case Currency(_, u) =&gt; &quot;Oh noes, I got&quot; + u
+    case Nothing =&gt; &quot;&quot;
+}
+</code></pre><p>当声明样例类时，以下几件事自动发生</p>
+<blockquote>
+<p>构造器中的每一个参数都成为val-除非它被显式声明为var</p>
+<p>在伴生对象中提供apply方法使我们不用new关键字就能构造出相应的对象，比如Dollar(29.95)或Currency(29.95,&quot;EUR&quot;)</p>
+<p>提供unapply方法让模式匹配可以工作</p>
+<p>将生成toString、equals、hashCode和copy方法-除非显式给出这些方法的定义。</p>
+</blockquote>
+<p>除上述外，样例类和其他类完全一样</p>
+<ul>
+<li>copy方法和带名参数</li></ul>
+<p>样例类的copy方法创建一个与现有对象值相同的新对象。例如：</p>
+<pre><code>val amt = Currency(29.95,&quot;EUR&quot;)
+val price = amt.copy()
+</code></pre><p>可以使用带名参数修改某些属性</p>
+<pre><code>val price = amt.copy(value = 19.95)//Currency(19.95,&quot;EUR&quot;)
+</code></pre><p>或者</p>
+<pre><code>val price = amt.copy(unit = &quot;CHF&quot;)//Currency(29.95, &quot;CHF&quot;)
+</code></pre><ul>
+<li>case语句中的中置表示法</li></ul>
+<p>如果unapply方法产出了一个对偶，则可以在cae语句中使用中置表示法。尤其是对于有两个参数的样例类，可以使用中置表示法来表示，如：</p>
+<pre><code>amt match{case a Currency u =&gt; ...}//等同于 case Currency(a,u)
+</code></pre><p>每个List对象要么是Nil，要么是定义如下的样例类::，</p>
+<pre><code>case class ::[E](head: E, tail: List[E]) extends List[E]
+</code></pre><p>因此可以写成 </p>
+<pre><code>lst match{case h::t=&gt; ...}//等同于case::(h,t)，将调用::.unapply(lst)
+</code></pre><ul>
+<li>匹配嵌套结构<br>样例类经常被用于嵌套结构。例如某个商店售卖的物品，有时会将物品打折在一起出售<pre><code>abstract class Item
+  case class Article(description: String, price: Double) extends Item
+  case class Bundle(description: String, discount: Double, items: Item*) extends Item//Item*表示多个Item
+</code></pre>因为不使用new，所以嵌套对象可以定义为<pre><code>Bundle(&quot;Father&#39;s day special&quot;, 20.0, Article(&quot;Scala for the Impatient&quot;, 39.95), Bundle(&quot;Anchor Distillery Sampler&quot;, 10.0, Article(&quot;Old Potrero Straight Rye Whisky&quot;, 79.95), Article(&quot;Junipero Gin&quot;, 32.95)))
+</code></pre>模式匹配可以匹配特定的嵌套，比如<pre><code>case Bundle(_,_,Article(descr, _), _*) =&gt; ...
+</code></pre>将descr绑定到Bundle的第一个Article的描述</li></ul>
+<p>也可以用@表示法将签到的值绑到变量：</p>
+<pre><code>case Bundle(_,_, art@ Article(_,_),rest @ _*)=&gt; ...
+</code></pre><p>这样依赖，art就是Bundle中的第一个Article，而rest则是剩余的Item的序列</p>
+<p>注意，在本例中，_*是必须的，对于</p>
+<pre><code>case Bundle(_,_,art@Article(_,_), rest) =&gt; ...
+</code></pre><p>将只能匹配到那种只有一个Article再加上不多不少正好一个Item的Bundle，这个Item将被绑定到rest变量</p>
+<p>作为该特性的一个实际应用，以下是一个计算某Item价格的函数</p>
+<pre><code>def price(it: Item): Double = it match{
+    case Article(_,p) =&gt; p
+    case Bundle(_, disc, its @ _*) =&gt; its.map(price _).sum -disc
+}
+</code></pre><ul>
+<li>密封类</li></ul>
+<p>当使用样例类做模式匹配时，可以让编译器帮助确保已经列出了所有可能的选择，通过将样例类的通用超类声明为sealed来达到这个目的</p>
+<pre><code>sealed abstract class Amount
+    case class Dollar(value: Double) extends Amount
+    case class Currency(value: Double, unit: String) extends Amount
+</code></pre><p>密封类的所有子类都必须在与该密封类相同的文件中定义。如果有人想要添加一个样例类</p>
+<pre><code>case class Euro(value: Double) extends Amount
+</code></pre><p>他们就必须在Amount被声明的那个文件中完成</p>
+<p>如果某个类是密封的，那么在编译期所有子类就是可知的，因而编译器可以检查模式语句的完整性。</p>
+<p>因此让所有同一组的样例类都扩展某个密封的类是个好的做法。</p>
+<ul>
+<li>模拟枚举</li></ul>
+<p>样例类模拟枚举的方式</p>
+<pre><code>sealed abstract classTrafficLightColor
+    case object Red extends TrafficLightColor
+    case object Yellow extends TrafficLightColor
+    case object Green extends TrafficLightColor
+
+    color match{
+        case Red =&gt; &quot;stop&quot;
+        case Yellow =&gt; &quot;hurry up&quot;
+        case Green =&gt; &quot;go&quot;
+    }
+</code></pre><p>其中超类被声明为sealed，编译器可以帮助检查match语句是否完整</p>
+<ul>
+<li>option类型</li></ul>
+<p>标准类库中的option类型用样例类来表示那种可能存在、也可能不存在的值。样例子类Some包装了某个值，如Some(&quot;Fred&quot;)。而样例对象None表示没有值。</p>
+<p>这种方式比使用空字符串的意图更加清晰，比使用null表示缺少某值的方式更加安全。</p>
+<p>Map类的get方法返回一个Option，如果对于给定的键没有对应的值，则get返回None。如果有值，就会将该值包在Some中返回，例如</p>
+<pre><code>scores.get(&quot;Alice&quot;) match{
+    case Some(score) =&gt; println(score)
+    case Node =&gt; println(&quot;No score&quot;)
+}
+</code></pre><p>或者使用isEmpty和get：</p>
+<pre><code>val alicesScore = scores.get(&quot;Alice&quot;)
+if(alicesScore.isEmpty) println(&quot;No score&quot;)
+else println(aliceScore.get)
+</code></pre><p>或者使用getOrElse方法：</p>
+<pre><code>println(aliceScore.getOrElse(&quot;No score&quot;))
+</code></pre><p>如果alicesScore为None，getOrElse将返回“No score”。实际上，这是个十分普遍的情况，Map类也提供了getOrElse方法</p>
+<pre><code>println(scores.getOrElse(&quot;Alice&quot;.&quot;No score&quot;))
+</code></pre><p>如果想略过None值，可以用for推导式：</p>
+<pre><code>for(score &lt;- scores.get(&quot;Alice&quot;)) println(score)
+</code></pre><p>如果get方法返回None，什么都不会发生，如果返回Some则score将被绑定到它的内容</p>
+<p>Option可以被当作是一个要么为空、要么带有单个元素的集合，可以使用map、foreach或filter等方法</p>
+<pre><code>scores.get(&quot;Alice&quot;).foreach(println _)//_可以去掉么,试过好像加没加没啥区别
+</code></pre><p>上述代码将打印分数，如果get返回None的话，什么都不用做</p>
+<ul>
+<li>偏函数</li></ul>
+<p>被包在花括号内的一组case语句是一个偏函数--一个并非对所有输入值都有定义的函数。它是PartialFunction[A,B]类的一个实例。（A是参数类型，B是返回类型），该类有两个方法：apply方法从匹配到的模式计算函数值，而isDefinedAt方法在输入至少匹配其中一个模式时返回true</p>
+<pre><code>val f: PartialFunction[Char,Int] = {case &#39;+&#39; =&gt; 1; case &#39;-&#39; =&gt; -1}
+f(&#39;-&#39;)//调用f.apply(&#39;-&#39;),返回-1
+f.isDefinedAt(&#39;0&#39;)//false
+f(&#39;0&#39;)//抛出MatchError
+</code></pre><p>有一些方法接收PartialFunction作为参数。举例来说，GenTraversable特质的collect方法将一个偏函数应用到所有在该偏函数有定义的元素，并返回包含这些结果的序列。</p>
+<pre><code>&quot;-3+4&quot;.collect{case &#39;+&#39; =&gt; 1; case &#39;-&#39; =&gt; -1}//Vector(-1,1)
+</code></pre>
+</body>
+</html>
+<!-- This document was created with MarkdownPad, the Markdown editor for Windows (http://markdownpad.com) -->

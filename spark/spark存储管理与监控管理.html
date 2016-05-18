@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>spark存储管理与监控管理</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+/* GitHub stylesheet for MarkdownPad (http://markdownpad.com) */
+/* Author: Nicolas Hery - http://nicolashery.com */
+/* Version: b13fe65ca28d2e568c6ed5d7f06581183df8f2ff */
+/* Source: https://github.com/nicolahery/markdownpad-github */
+
+/* RESET
+=============================================================================*/
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* BODY
+=============================================================================*/
+
+body {
+  font-family: Helvetica, arial, freesans, clean, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  background-color: #fff;
+  padding: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+body>*:first-child {
+  margin-top: 0 !important;
+}
+
+body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* BLOCKS
+=============================================================================*/
+
+p, blockquote, ul, ol, dl, table, pre {
+  margin: 15px 0;
+}
+
+/* HEADERS
+=============================================================================*/
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 20px 0 10px;
+  padding: 0;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 tt, h1 code, h2 tt, h2 code, h3 tt, h3 code, h4 tt, h4 code, h5 tt, h5 code, h6 tt, h6 code {
+  font-size: inherit;
+}
+
+h1 {
+  font-size: 28px;
+  color: #000;
+}
+
+h2 {
+  font-size: 24px;
+  border-bottom: 1px solid #ccc;
+  color: #000;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+h4 {
+  font-size: 16px;
+}
+
+h5 {
+  font-size: 14px;
+}
+
+h6 {
+  color: #777;
+  font-size: 14px;
+}
+
+body>h2:first-child, body>h1:first-child, body>h1:first-child+h2, body>h3:first-child, body>h4:first-child, body>h5:first-child, body>h6:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+h1+p, h2+p, h3+p, h4+p, h5+p, h6+p {
+  margin-top: 10px;
+}
+
+/* LINKS
+=============================================================================*/
+
+a {
+  color: #4183C4;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* LISTS
+=============================================================================*/
+
+ul, ol {
+  padding-left: 30px;
+}
+
+ul li > :first-child, 
+ol li > :first-child, 
+ul li ul:first-of-type, 
+ol li ol:first-of-type, 
+ul li ol:first-of-type, 
+ol li ul:first-of-type {
+  margin-top: 0px;
+}
+
+ul ul, ul ol, ol ol, ol ul {
+  margin-bottom: 0;
+}
+
+dl {
+  padding: 0;
+}
+
+dl dt {
+  font-size: 14px;
+  font-weight: bold;
+  font-style: italic;
+  padding: 0;
+  margin: 15px 0 5px;
+}
+
+dl dt:first-child {
+  padding: 0;
+}
+
+dl dt>:first-child {
+  margin-top: 0px;
+}
+
+dl dt>:last-child {
+  margin-bottom: 0px;
+}
+
+dl dd {
+  margin: 0 0 15px;
+  padding: 0 15px;
+}
+
+dl dd>:first-child {
+  margin-top: 0px;
+}
+
+dl dd>:last-child {
+  margin-bottom: 0px;
+}
+
+/* CODE
+=============================================================================*/
+
+pre, code, tt {
+  font-size: 12px;
+  font-family: Consolas, "Liberation Mono", Courier, monospace;
+}
+
+code, tt {
+  margin: 0 0px;
+  padding: 0px 0px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+}
+
+pre>code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent;
+}
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px;
+}
+
+pre code, pre tt {
+  background-color: transparent;
+  border: none;
+}
+
+kbd {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #DDDDDD;
+    background-image: linear-gradient(#F1F1F1, #DDDDDD);
+    background-repeat: repeat-x;
+    border-color: #DDDDDD #CCCCCC #CCCCCC #DDDDDD;
+    border-image: none;
+    border-radius: 2px 2px 2px 2px;
+    border-style: solid;
+    border-width: 1px;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    line-height: 10px;
+    padding: 1px 4px;
+}
+
+/* QUOTES
+=============================================================================*/
+
+blockquote {
+  border-left: 4px solid #DDD;
+  padding: 0 15px;
+  color: #777;
+}
+
+blockquote>:first-child {
+  margin-top: 0px;
+}
+
+blockquote>:last-child {
+  margin-bottom: 0px;
+}
+
+/* HORIZONTAL RULES
+=============================================================================*/
+
+hr {
+  clear: both;
+  margin: 15px 0;
+  height: 0px;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  border-bottom: 4px solid #ddd;
+  padding: 0;
+}
+
+/* TABLES
+=============================================================================*/
+
+table th {
+  font-weight: bold;
+}
+
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 6px 13px;
+}
+
+table tr {
+  border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+table tr:nth-child(2n) {
+  background-color: #f8f8f8;
+}
+
+/* IMAGES
+=============================================================================*/
+
+img {
+  max-width: 100%
+}
+</style>
+<style type="text/css">
+.highlight  { background: #ffffff; }
+.highlight .c { color: #999988; font-style: italic } /* Comment */
+.highlight .err { color: #a61717; background-color: #e3d2d2 } /* Error */
+.highlight .k { font-weight: bold } /* Keyword */
+.highlight .o { font-weight: bold } /* Operator */
+.highlight .cm { color: #999988; font-style: italic } /* Comment.Multiline */
+.highlight .cp { color: #999999; font-weight: bold } /* Comment.Preproc */
+.highlight .c1 { color: #999988; font-style: italic } /* Comment.Single */
+.highlight .cs { color: #999999; font-weight: bold; font-style: italic } /* Comment.Special */
+.highlight .gd { color: #000000; background-color: #ffdddd } /* Generic.Deleted */
+.highlight .gd .x { color: #000000; background-color: #ffaaaa } /* Generic.Deleted.Specific */
+.highlight .ge { font-style: italic } /* Generic.Emph */
+.highlight .gr { color: #aa0000 } /* Generic.Error */
+.highlight .gh { color: #999999 } /* Generic.Heading */
+.highlight .gi { color: #000000; background-color: #ddffdd } /* Generic.Inserted */
+.highlight .gi .x { color: #000000; background-color: #aaffaa } /* Generic.Inserted.Specific */
+.highlight .go { color: #888888 } /* Generic.Output */
+.highlight .gp { color: #555555 } /* Generic.Prompt */
+.highlight .gs { font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #aaaaaa } /* Generic.Subheading */
+.highlight .gt { color: #aa0000 } /* Generic.Traceback */
+.highlight .kc { font-weight: bold } /* Keyword.Constant */
+.highlight .kd { font-weight: bold } /* Keyword.Declaration */
+.highlight .kp { font-weight: bold } /* Keyword.Pseudo */
+.highlight .kr { font-weight: bold } /* Keyword.Reserved */
+.highlight .kt { color: #445588; font-weight: bold } /* Keyword.Type */
+.highlight .m { color: #009999 } /* Literal.Number */
+.highlight .s { color: #d14 } /* Literal.String */
+.highlight .na { color: #008080 } /* Name.Attribute */
+.highlight .nb { color: #0086B3 } /* Name.Builtin */
+.highlight .nc { color: #445588; font-weight: bold } /* Name.Class */
+.highlight .no { color: #008080 } /* Name.Constant */
+.highlight .ni { color: #800080 } /* Name.Entity */
+.highlight .ne { color: #990000; font-weight: bold } /* Name.Exception */
+.highlight .nf { color: #990000; font-weight: bold } /* Name.Function */
+.highlight .nn { color: #555555 } /* Name.Namespace */
+.highlight .nt { color: #000080 } /* Name.Tag */
+.highlight .nv { color: #008080 } /* Name.Variable */
+.highlight .ow { font-weight: bold } /* Operator.Word */
+.highlight .w { color: #bbbbbb } /* Text.Whitespace */
+.highlight .mf { color: #009999 } /* Literal.Number.Float */
+.highlight .mh { color: #009999 } /* Literal.Number.Hex */
+.highlight .mi { color: #009999 } /* Literal.Number.Integer */
+.highlight .mo { color: #009999 } /* Literal.Number.Oct */
+.highlight .sb { color: #d14 } /* Literal.String.Backtick */
+.highlight .sc { color: #d14 } /* Literal.String.Char */
+.highlight .sd { color: #d14 } /* Literal.String.Doc */
+.highlight .s2 { color: #d14 } /* Literal.String.Double */
+.highlight .se { color: #d14 } /* Literal.String.Escape */
+.highlight .sh { color: #d14 } /* Literal.String.Heredoc */
+.highlight .si { color: #d14 } /* Literal.String.Interpol */
+.highlight .sx { color: #d14 } /* Literal.String.Other */
+.highlight .sr { color: #009926 } /* Literal.String.Regex */
+.highlight .s1 { color: #d14 } /* Literal.String.Single */
+.highlight .ss { color: #990073 } /* Literal.String.Symbol */
+.highlight .bp { color: #999999 } /* Name.Builtin.Pseudo */
+.highlight .vc { color: #008080 } /* Name.Variable.Class */
+.highlight .vg { color: #008080 } /* Name.Variable.Global */
+.highlight .vi { color: #008080 } /* Name.Variable.Instance */
+.highlight .il { color: #009999 } /* Literal.Number.Integer.Long */
+.pl-c {
+    color: #969896;
+}
+
+.pl-c1,.pl-mdh,.pl-mm,.pl-mp,.pl-mr,.pl-s1 .pl-v,.pl-s3,.pl-sc,.pl-sv {
+    color: #0086b3;
+}
+
+.pl-e,.pl-en {
+    color: #795da3;
+}
+
+.pl-s1 .pl-s2,.pl-smi,.pl-smp,.pl-stj,.pl-vo,.pl-vpf {
+    color: #333;
+}
+
+.pl-ent {
+    color: #63a35c;
+}
+
+.pl-k,.pl-s,.pl-st {
+    color: #a71d5d;
+}
+
+.pl-pds,.pl-s1,.pl-s1 .pl-pse .pl-s2,.pl-sr,.pl-sr .pl-cce,.pl-sr .pl-sra,.pl-sr .pl-sre,.pl-src,.pl-v {
+    color: #df5000;
+}
+
+.pl-id {
+    color: #b52a1d;
+}
+
+.pl-ii {
+    background-color: #b52a1d;
+    color: #f8f8f8;
+}
+
+.pl-sr .pl-cce {
+    color: #63a35c;
+    font-weight: bold;
+}
+
+.pl-ml {
+    color: #693a17;
+}
+
+.pl-mh,.pl-mh .pl-en,.pl-ms {
+    color: #1d3e81;
+    font-weight: bold;
+}
+
+.pl-mq {
+    color: #008080;
+}
+
+.pl-mi {
+    color: #333;
+    font-style: italic;
+}
+
+.pl-mb {
+    color: #333;
+    font-weight: bold;
+}
+
+.pl-md,.pl-mdhf {
+    background-color: #ffecec;
+    color: #bd2c00;
+}
+
+.pl-mdht,.pl-mi1 {
+    background-color: #eaffea;
+    color: #55a532;
+}
+
+.pl-mdr {
+    color: #795da3;
+    font-weight: bold;
+}
+
+.pl-mo {
+    color: #1d3e81;
+}
+.task-list {
+padding-left:10px;
+margin-bottom:0;
+}
+
+.task-list li {
+    margin-left: 20px;
+}
+
+.task-list-item {
+list-style-type:none;
+padding-left:10px;
+}
+
+.task-list-item label {
+font-weight:400;
+}
+
+.task-list-item.enabled label {
+cursor:pointer;
+}
+
+.task-list-item+.task-list-item {
+margin-top:3px;
+}
+
+.task-list-item-checkbox {
+display:inline-block;
+margin-left:-20px;
+margin-right:3px;
+vertical-align:1px;
+}
+</style>
+</head>
+<body>
+<h3 id="spark-">spark的存储管理</h3>
+<h4 id="-">存储管理模块整体架构</h4>
+<p>1.从架构上看，存储管理模块主要分为以下两层：</p>
+<ul>
+<li>通信层：存储管理模块采用的是主从结构实现通信层，主节点和从节点之间传输控制信息、状态信息。</li><li>存储层：存储管理模块需要把数据存储到硬盘和内存中，必要时还需要复制到远端，这些操作由存储层来实现和提供相应接口。</li></ul>
+<p>2.从功能上看：</p>
+<ul>
+<li>RDD缓存：整个存储管理模块主要的工作是作为RDD的缓存，包括基于内存和磁盘的缓存。</li><li>Shuffle数据的持久化：Shuffle中间结构的数据也是交由存储管理模块进行管理的。</li></ul>
+<blockquote>
+<p>同时存储管理模块提供了与其他模块进行交互的接口，由同一的操作类BlockManager提供。</p>
+</blockquote>
+<h5 id="-">通信层架构</h5>
+<p>首先看一下通信层UML类图：<br><img src="http://www.aboutyun.com/data/attachment/forum/201410/21/195509dtg9rzzt9tzga0qg.png" alt="通信层类图"></p>
+<blockquote>
+<p>spark会在Driver端和Executor端创建各自的BlockManager,通过BlockManager对存储管理模块进行操作。</p>
+</blockquote>
+<p>其次我们来看看各个类在master和slave上所扮演的不同角色：<br><img src="http://www.aboutyun.com/data/attachment/forum/201410/21/195524dshhprp9bva3rvoo.png" alt="各类之间的角色关系"></p>
+<blockquote>
+<p>主节点的BlockManager中包含了所有从节点的BlockManager信息，便于能够从主节点向从节点发送信息。</p>
+<p>在BlockManager内部，主从节点之间的BlockManagerMasterActor互相通信，传输相应的信息；主从节点之间的BlockManagerSlaveActor也可以相互通信，传送RDD的控制信息。</p>
+<p>actor和ref: actor和ref是Akka中的两个不同的actor reference，分别由actorOf和actorFor所创建。actor类似于网络服务中的server端，它保存所有的状态信息，接收client端的请求执行并返回给客户端；ref类似于网络服务中的client端，通过向server端发起请求获取结果。</p>
+</blockquote>
+<h5 id="-">通信层消息传递</h5>
+<ol>
+<li>BlockManagerMasterActor之间相互传递的消息如下：</li></ol>
+<ul>
+<li>RegisterBlockManager:Executor端创建BlockManager后向Driver发送请求进行注册。</li><li>UpdateBlockInfo:更新数据块的元信息</li><li>GetPeers:请求获得其他BlockManager的ID</li><li>GetLocations:获取数据块所在的BlockManager的ID</li><li>GetLocationsMultipleBlockIds:获取一组数据块所在BlockManager的ID。</li><li>RemoveExecutor:删除已经死亡的Executor上的BlockManager<blockquote>
+<p>每个Executor上的BlockManager只负责管理其自身的Executor所拥有的数据块元信息，而不会管理其他Executor上的数据元信息；而Driver端的BlockManager拥有所有已注册的BlockManager信息和数据块元信息，因此Executor端的BlockManager往往是通过Driver发送信息来获得所需要的非本地数据的。</p>
+</blockquote>
+</li></ul>
+<p>2.BlockManagerSlaveActor互相传递消息如下：</p>
+<ul>
+<li>RemoveBlock:删除数据块</li><li>RemoveRdd:删除RDD</li></ul>
+<h5 id="-">注册存储管理模块</h5>
+<p>1.首先从节点上的BlockManager会调用initialize()初始化自己。<br>2.初始化过程中，调用BlockManagerMaster的registerBlockManager（）发送注册消息。<br>3.主节点上BlockManagerMasterActor在收到注册消息后，调用register()函数注册BlockManager</p>
+<blockquote>
+<p>register()函数内部会把收到的BlockManager信息和其自身标识存到哈希表中，后续主从节点通信时，可以从哈希表中取出相应的从节点BlockManager信息来进行。</p>
+</blockquote>
+<h5 id="-">存储层架构</h5>
+<p>在RDD层面上我们了解到RDD是由不同的partition组成的，我们所进行的transformation和action是在partition上面进行的；而在storage模块内部，RDD又被视为由不同的block组成，对于RDD的存取是以block为单位进行的，本质上partition和block是等价的，只是看待的角度不同。在Spark storage模块中中存取数据的最小单位是block，所有的操作都是以block为单位进行的。</p>
+<p>首先我们来看一下存储层的UML类图:</p>
+<p><img src="http://www.aboutyun.com/data/attachment/forum/201410/21/195843qdql4l2chdcnz46h.png" alt="存储层类图"></p>
+<p>BlockManager对象被创建的时候会创建出MemoryStore和DiskStore对象用以存取block，同时在initialize()函数中创建BlockManagerWorker对象用以监听远程的block存取请求来进行相应处理。</p>
+<blockquote>
+<p>DiskStore不同于MemoryStore之处是它还包含了DiskBlockobjectWriter，它是为Shuffle数据实体化到磁盘中而构建的句柄类。</p>
+</blockquote>
+<h5 id="-block-">数据块（Block）</h5>
+<p>简单介绍Spark存储管理模块中所管理的几种主要数据块。</p>
+<ul>
+<li>RDD数据块：用来标识所缓存的RDD数据。</li><li>Shuffle数据块：用来标识持久化的Shuffle数据。</li><li>广播变量数据块：用来标识所存储的广播变量数据。</li><li>任务返回结果数据块：用来标识存储在存储模块内部的任务返回结果。</li><li>流式数据块：只用在Spark Streaming中，用来标识所接收到的流式数据块。</li></ul>
+<h4 id="rdd-">RDD持久化</h4>
+<h5 id="rdd-">RDD分区和数据块的关系</h5>
+<p>RDD上的所有运算都是基于分区的。<br>分区是一个逻辑上的概念，而数据块是物理上的数据实体。</p>
+<ul>
+<li>在Spark中，分区和数据块是一一对应的，一个RDD钟的一个分区对应着存储管理模块中的一个数据块。</li><li>spark为每一个RDD在其内部维护了独立的ID号，同时，对于每一个分区也有一个独立的索引号，“ID号+索引号”，就能唯一确定分区。</li></ul>
+<h5 id="-">内存缓存</h5>
+<p>以默认或基于内存的持久化方式缓存RDD时，RDD中的每一个分区所对应的数据块是会被存储模块中的内存管理所管理的。内存缓存在其内部维护了一个以数据块名称为键，块内容为值得哈希表。</p>
+<p>当内存已经达到所设置的阈值时应该如何处理（阈值通过spark.storage.memoryFraction设置）：</p>
+<ul>
+<li>丢弃一些数据块，数据块持久化选项不包含磁盘缓存</li><li>将一些数据块存储到磁盘上，数据块持久化选项包含磁盘缓存</li></ul>
+<h5 id="-">磁盘缓存</h5>
+<p>磁盘缓存的数据块会被放到磁盘中的特定目录下。<br>在磁盘缓存中，一个数据块对应着文件系统中的一个文件，文件名和块名称的映射关系是通过哈希算法计算所得的。</p>
+<p>建立了块和文件之间的对应关系，存取块的内容就变成了写入和读取相应的文件了。</p>
+<h5 id="-">持久化选项</h5>
+<p>当我们需要将某一个RDD持久化时，我们可以调用RDD所提供的persist()或者cache()函数进行操作。</p>
+<ul>
+<li>当用户使用persist()函数进行持久化时，需要选择一种持久化方式，这种方式决定了RDD最后的持久化策略。</li><li>如果用户调用cache()函数进行持久化，则默认MEMORY_ONLY(内存)的方式持久化。</li></ul>
+<blockquote>
+<p>这些持久化策略都是由类org.apache.spark.StorageLevel决定的。</p>
+</blockquote>
+<p><img src="http://image.lxway.com/upload/b/89/b89b157aea33bd0c950f6deb1f45d379_thumb.png" alt="spark提供的持久化选项"></p>
+<h5 id="-">如何选择不同的持久化选项</h5>
+<p>持久化方式选择的建议：</p>
+<ul>
+<li>如果使用默认的持久化方式（MEMORY_ONLY）完全能够缓存RDD，那么久无需选择其他的持久化方式，因为这是CPU利用率最高的一种方式，能够确保程序跑得尽可能快。</li><li>如果默认的持久化方式无法完全缓存所需的RDD，可以尝试使用MEMEMORY_ONLY_SER这种持久化方式，并选用更快速的序列化方式，这能够搞笑的使用内存，同时确保程序跑得相对较快。</li><li>除非对RDD的重算带来的开销比缓存到磁盘来得到，一般情况下不要将RDD缓存到磁盘上，通常情况下，对于某一分区的重算会比从磁盘中读取要快。</li><li>如果想要确保快速的错误恢复机制，应尽可能选用带有备份的持久化方式。虽然前面提到过所有的持久化方式都可以通过重算丢失数据从错误中恢复，但是备份可以使得任务继续进行而无需等待丢失分区的重新计算。</li></ul>
+<h4 id="shuffle-">Shuffle数据持久化</h4>
+<p>与RDD持久化的不同之处在于：</p>
+<ul>
+<li>首先Shuffle数据块必须是在磁盘上进行缓存的，不能在内存中缓存</li><li>其次，在RDD基于磁盘的持久化中，每一个数据块对应着一个文件，而在Shuffle数据块的持久化中，Shuffle数据块表示的只是逻辑上的概念，不同的实现方式可以决定Shuffle数据块的不同存储方式。</li></ul>
+<p>在Spark存储管理模块中，Shuffle数据块有两种存储方式：</p>
+<ul>
+<li>一种是将Shuffle数据块映射成文件，这是默认方式</li><li>另一种是将Shuffle数据块映射成文件中的一段，这种方式需要将spark.shuffle.consolidateFiles设置为true。</li></ul>
+<blockquote>
+<p>默认方式会产生大量文件，因此有了第二种实现方式，将分时运行的Map任务所产生的Shuffle数据块合并到同一个文件中，减少Shuffle文件的总数。</p>
+</blockquote>
+<h4 id="-broadcast-">广播(Broadcast)变量持久化</h4>
+<p>在编写spark应用程序时，为了加速对一些小块数据的读取，我们往往希望这些数据在所有节点上都有一份拷贝，每个任务都能从本节点的拷贝中读取数据而无需通过远程传输获取数据——通过广播变量借口实现。</p>
+<blockquote>
+<p>广播变量是由存储管理模块进行管理的。</p>
+<p>广播数据块是以MEMORY_AND_DISK的持久化方式存入本节点的存储管理模块中的。</p>
+<p>通过设置过期清理机制，spark内部会清理过期的广播变量。</p>
+</blockquote>
+<h3 id="spark-">Spark监控管理</h3>
+<p>spark中，提供了应用监控UI和spark Metrics两种监控方式。</p>
+<h4 id="ui-">UI管理</h4>
+<p>应用监控UI以网页形式提供给最终用户，spark提供了两类形式的UI监控，分为实时UI管理和历史UI管理。</p>
+<h5 id="-ui-">实时UI管理</h5>
+<p>实时UI管理是指在spark程序运行过程中，可以通过UI界面刷新查看即时的作业信息。</p>
+<p>Spark程序的启动，意味着需要创建一个SparkContext，同时也启动了一个Web服务。默认情况下监听4040端口，浏览这个Spark程序的UI可以简单打开http://<driver-node>:4040链接。如果在一台机器上有多个SparkContext启动，那么监听的端口顺延。</p>
+<p>Spark程序的实时监控界面大致包含下表中的四部分内容，从各个维度监控spark的作业运行情况。</p>
+<p>UI监控信息分类<br>|Stage | 从Spark作业调度的角度，展示了调度阶段和任务的完成状态|<br>|---- |---------------|<br>|Storage| 从Spark存储系统的角度，展示了Spark中RDD的存储状态|<br>|Environment|从Spark运行环境的角度，展示了Spark及系统环境参数|<br>|Executor|从Spark执行的角度，展示了每个执行体运行任务的状况|</p>
+<h5 id="-ui-">历史UI管理</h5>
+<p>由于实时UI中展现的是Spark应用程序实时的运行状态，当应用程序运行结束后，该实时监控UI将变得不可访问，所以，如果在程序运行结束后任然希望复盘此应用的运行状态，就需要利用Spark应用程序的UI历史管理——可以通过设置参数实现。</p>
+<h4 id="metrics-">Metrics管理</h4>
+<p>Spark在其内部拥有一个可配置的度量系统，它是基于Coda Hale的Metrics库构建的，能够将Spark的内部状态通过不同形式呈现给用户。同时，用户也可以以插件的方式实现自己的数据源和数据输出方式。</p>
+<blockquote>
+<p>Metrics系统由配置文件metrics.properties进行配置。</p>
+</blockquote>
+
+</body>
+</html>
+<!-- This document was created with MarkdownPad, the Markdown editor for Windows (http://markdownpad.com) -->

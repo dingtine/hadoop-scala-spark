@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>spark运行模式及原理</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+/* GitHub stylesheet for MarkdownPad (http://markdownpad.com) */
+/* Author: Nicolas Hery - http://nicolashery.com */
+/* Version: b13fe65ca28d2e568c6ed5d7f06581183df8f2ff */
+/* Source: https://github.com/nicolahery/markdownpad-github */
+
+/* RESET
+=============================================================================*/
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* BODY
+=============================================================================*/
+
+body {
+  font-family: Helvetica, arial, freesans, clean, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  background-color: #fff;
+  padding: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+body>*:first-child {
+  margin-top: 0 !important;
+}
+
+body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* BLOCKS
+=============================================================================*/
+
+p, blockquote, ul, ol, dl, table, pre {
+  margin: 15px 0;
+}
+
+/* HEADERS
+=============================================================================*/
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 20px 0 10px;
+  padding: 0;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 tt, h1 code, h2 tt, h2 code, h3 tt, h3 code, h4 tt, h4 code, h5 tt, h5 code, h6 tt, h6 code {
+  font-size: inherit;
+}
+
+h1 {
+  font-size: 28px;
+  color: #000;
+}
+
+h2 {
+  font-size: 24px;
+  border-bottom: 1px solid #ccc;
+  color: #000;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+h4 {
+  font-size: 16px;
+}
+
+h5 {
+  font-size: 14px;
+}
+
+h6 {
+  color: #777;
+  font-size: 14px;
+}
+
+body>h2:first-child, body>h1:first-child, body>h1:first-child+h2, body>h3:first-child, body>h4:first-child, body>h5:first-child, body>h6:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+h1+p, h2+p, h3+p, h4+p, h5+p, h6+p {
+  margin-top: 10px;
+}
+
+/* LINKS
+=============================================================================*/
+
+a {
+  color: #4183C4;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* LISTS
+=============================================================================*/
+
+ul, ol {
+  padding-left: 30px;
+}
+
+ul li > :first-child, 
+ol li > :first-child, 
+ul li ul:first-of-type, 
+ol li ol:first-of-type, 
+ul li ol:first-of-type, 
+ol li ul:first-of-type {
+  margin-top: 0px;
+}
+
+ul ul, ul ol, ol ol, ol ul {
+  margin-bottom: 0;
+}
+
+dl {
+  padding: 0;
+}
+
+dl dt {
+  font-size: 14px;
+  font-weight: bold;
+  font-style: italic;
+  padding: 0;
+  margin: 15px 0 5px;
+}
+
+dl dt:first-child {
+  padding: 0;
+}
+
+dl dt>:first-child {
+  margin-top: 0px;
+}
+
+dl dt>:last-child {
+  margin-bottom: 0px;
+}
+
+dl dd {
+  margin: 0 0 15px;
+  padding: 0 15px;
+}
+
+dl dd>:first-child {
+  margin-top: 0px;
+}
+
+dl dd>:last-child {
+  margin-bottom: 0px;
+}
+
+/* CODE
+=============================================================================*/
+
+pre, code, tt {
+  font-size: 12px;
+  font-family: Consolas, "Liberation Mono", Courier, monospace;
+}
+
+code, tt {
+  margin: 0 0px;
+  padding: 0px 0px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+}
+
+pre>code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent;
+}
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px;
+}
+
+pre code, pre tt {
+  background-color: transparent;
+  border: none;
+}
+
+kbd {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #DDDDDD;
+    background-image: linear-gradient(#F1F1F1, #DDDDDD);
+    background-repeat: repeat-x;
+    border-color: #DDDDDD #CCCCCC #CCCCCC #DDDDDD;
+    border-image: none;
+    border-radius: 2px 2px 2px 2px;
+    border-style: solid;
+    border-width: 1px;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    line-height: 10px;
+    padding: 1px 4px;
+}
+
+/* QUOTES
+=============================================================================*/
+
+blockquote {
+  border-left: 4px solid #DDD;
+  padding: 0 15px;
+  color: #777;
+}
+
+blockquote>:first-child {
+  margin-top: 0px;
+}
+
+blockquote>:last-child {
+  margin-bottom: 0px;
+}
+
+/* HORIZONTAL RULES
+=============================================================================*/
+
+hr {
+  clear: both;
+  margin: 15px 0;
+  height: 0px;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  border-bottom: 4px solid #ddd;
+  padding: 0;
+}
+
+/* TABLES
+=============================================================================*/
+
+table th {
+  font-weight: bold;
+}
+
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 6px 13px;
+}
+
+table tr {
+  border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+table tr:nth-child(2n) {
+  background-color: #f8f8f8;
+}
+
+/* IMAGES
+=============================================================================*/
+
+img {
+  max-width: 100%
+}
+</style>
+<style type="text/css">
+.highlight  { background: #ffffff; }
+.highlight .c { color: #999988; font-style: italic } /* Comment */
+.highlight .err { color: #a61717; background-color: #e3d2d2 } /* Error */
+.highlight .k { font-weight: bold } /* Keyword */
+.highlight .o { font-weight: bold } /* Operator */
+.highlight .cm { color: #999988; font-style: italic } /* Comment.Multiline */
+.highlight .cp { color: #999999; font-weight: bold } /* Comment.Preproc */
+.highlight .c1 { color: #999988; font-style: italic } /* Comment.Single */
+.highlight .cs { color: #999999; font-weight: bold; font-style: italic } /* Comment.Special */
+.highlight .gd { color: #000000; background-color: #ffdddd } /* Generic.Deleted */
+.highlight .gd .x { color: #000000; background-color: #ffaaaa } /* Generic.Deleted.Specific */
+.highlight .ge { font-style: italic } /* Generic.Emph */
+.highlight .gr { color: #aa0000 } /* Generic.Error */
+.highlight .gh { color: #999999 } /* Generic.Heading */
+.highlight .gi { color: #000000; background-color: #ddffdd } /* Generic.Inserted */
+.highlight .gi .x { color: #000000; background-color: #aaffaa } /* Generic.Inserted.Specific */
+.highlight .go { color: #888888 } /* Generic.Output */
+.highlight .gp { color: #555555 } /* Generic.Prompt */
+.highlight .gs { font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #aaaaaa } /* Generic.Subheading */
+.highlight .gt { color: #aa0000 } /* Generic.Traceback */
+.highlight .kc { font-weight: bold } /* Keyword.Constant */
+.highlight .kd { font-weight: bold } /* Keyword.Declaration */
+.highlight .kp { font-weight: bold } /* Keyword.Pseudo */
+.highlight .kr { font-weight: bold } /* Keyword.Reserved */
+.highlight .kt { color: #445588; font-weight: bold } /* Keyword.Type */
+.highlight .m { color: #009999 } /* Literal.Number */
+.highlight .s { color: #d14 } /* Literal.String */
+.highlight .na { color: #008080 } /* Name.Attribute */
+.highlight .nb { color: #0086B3 } /* Name.Builtin */
+.highlight .nc { color: #445588; font-weight: bold } /* Name.Class */
+.highlight .no { color: #008080 } /* Name.Constant */
+.highlight .ni { color: #800080 } /* Name.Entity */
+.highlight .ne { color: #990000; font-weight: bold } /* Name.Exception */
+.highlight .nf { color: #990000; font-weight: bold } /* Name.Function */
+.highlight .nn { color: #555555 } /* Name.Namespace */
+.highlight .nt { color: #000080 } /* Name.Tag */
+.highlight .nv { color: #008080 } /* Name.Variable */
+.highlight .ow { font-weight: bold } /* Operator.Word */
+.highlight .w { color: #bbbbbb } /* Text.Whitespace */
+.highlight .mf { color: #009999 } /* Literal.Number.Float */
+.highlight .mh { color: #009999 } /* Literal.Number.Hex */
+.highlight .mi { color: #009999 } /* Literal.Number.Integer */
+.highlight .mo { color: #009999 } /* Literal.Number.Oct */
+.highlight .sb { color: #d14 } /* Literal.String.Backtick */
+.highlight .sc { color: #d14 } /* Literal.String.Char */
+.highlight .sd { color: #d14 } /* Literal.String.Doc */
+.highlight .s2 { color: #d14 } /* Literal.String.Double */
+.highlight .se { color: #d14 } /* Literal.String.Escape */
+.highlight .sh { color: #d14 } /* Literal.String.Heredoc */
+.highlight .si { color: #d14 } /* Literal.String.Interpol */
+.highlight .sx { color: #d14 } /* Literal.String.Other */
+.highlight .sr { color: #009926 } /* Literal.String.Regex */
+.highlight .s1 { color: #d14 } /* Literal.String.Single */
+.highlight .ss { color: #990073 } /* Literal.String.Symbol */
+.highlight .bp { color: #999999 } /* Name.Builtin.Pseudo */
+.highlight .vc { color: #008080 } /* Name.Variable.Class */
+.highlight .vg { color: #008080 } /* Name.Variable.Global */
+.highlight .vi { color: #008080 } /* Name.Variable.Instance */
+.highlight .il { color: #009999 } /* Literal.Number.Integer.Long */
+.pl-c {
+    color: #969896;
+}
+
+.pl-c1,.pl-mdh,.pl-mm,.pl-mp,.pl-mr,.pl-s1 .pl-v,.pl-s3,.pl-sc,.pl-sv {
+    color: #0086b3;
+}
+
+.pl-e,.pl-en {
+    color: #795da3;
+}
+
+.pl-s1 .pl-s2,.pl-smi,.pl-smp,.pl-stj,.pl-vo,.pl-vpf {
+    color: #333;
+}
+
+.pl-ent {
+    color: #63a35c;
+}
+
+.pl-k,.pl-s,.pl-st {
+    color: #a71d5d;
+}
+
+.pl-pds,.pl-s1,.pl-s1 .pl-pse .pl-s2,.pl-sr,.pl-sr .pl-cce,.pl-sr .pl-sra,.pl-sr .pl-sre,.pl-src,.pl-v {
+    color: #df5000;
+}
+
+.pl-id {
+    color: #b52a1d;
+}
+
+.pl-ii {
+    background-color: #b52a1d;
+    color: #f8f8f8;
+}
+
+.pl-sr .pl-cce {
+    color: #63a35c;
+    font-weight: bold;
+}
+
+.pl-ml {
+    color: #693a17;
+}
+
+.pl-mh,.pl-mh .pl-en,.pl-ms {
+    color: #1d3e81;
+    font-weight: bold;
+}
+
+.pl-mq {
+    color: #008080;
+}
+
+.pl-mi {
+    color: #333;
+    font-style: italic;
+}
+
+.pl-mb {
+    color: #333;
+    font-weight: bold;
+}
+
+.pl-md,.pl-mdhf {
+    background-color: #ffecec;
+    color: #bd2c00;
+}
+
+.pl-mdht,.pl-mi1 {
+    background-color: #eaffea;
+    color: #55a532;
+}
+
+.pl-mdr {
+    color: #795da3;
+    font-weight: bold;
+}
+
+.pl-mo {
+    color: #1d3e81;
+}
+.task-list {
+padding-left:10px;
+margin-bottom:0;
+}
+
+.task-list li {
+    margin-left: 20px;
+}
+
+.task-list-item {
+list-style-type:none;
+padding-left:10px;
+}
+
+.task-list-item label {
+font-weight:400;
+}
+
+.task-list-item.enabled label {
+cursor:pointer;
+}
+
+.task-list-item+.task-list-item {
+margin-top:3px;
+}
+
+.task-list-item-checkbox {
+display:inline-block;
+margin-left:-20px;
+margin-right:3px;
+vertical-align:1px;
+}
+</style>
+</head>
+<body>
+<h4 id="spark-">spark运行模式概述</h4>
+<h5 id="spark-">spark运行模式列表</h5>
+<p>在实际应用中，Spark应用程序的运行模式取决于传递给SparkContext的MASTER环境变量的值，个别模式还需要依赖辅助的程序接口来配合使用，目前所支持的MASTER环境变量由特定的字符串或URL所组成，如下所示。</p>
+<ul>
+<li>Local[N]：本地模式，使用N个线程。</li><li>Local cluster[worker, core, Memory]：伪分布式模式，可以配置所需要启动的虚拟工作节点的数量，以及每个工作节点所管理的CPU数量和内存尺寸。</li><li>Spark://hostname:port：Standalone模式，需要部署Spark到相关节点，URL为Spark Master主机地址和端口。</li><li>Mesos://hostname:port：Mesos模式，需要部署Spark和Mesos到相关节点，URL为Mesos主机地址和端口。</li><li>YARN standalone/Yarn cluster：YARN模式一，主程序逻辑和任务都运行在YARN集群中。</li><li>YARN client：YARN模式二，主程序逻辑运行在本地，具体任务运行在YARN集群中。</li></ul>
+<h5 id="spark-">spark基本工作流程</h5>
+<p>spark的各种运行模式，从根本上都是将spark的应用分为任务调度和任务执行两个部分。</p>
+<p>下图是在分布式模式下，Spark的各个调度和执行模块的大致框架图。对于本地模式来说，其内部程序逻辑结构也是类似的，只是其中部分模块有所简化，例如集群管理模块简化为进程内部的线程池。</p>
+<p><img src="http://attach.dataguru.cn/attachments/portal/201503/26/104444lr7dvclottdvhvdt.jpg" alt="spark调度执行基本框架"></p>
+<p>从图中可以看到，所有的Spark应用程序都离不开SparkContext和Executor两部分，Executor负责执行任务，运行Executor的机器称为Worker节点，SparkContext由用户程序启动，通过资源调度模块和Executor通信。</p>
+<blockquote>
+<p>以SparkContext为程序运行的总入口，在SparkContext的初始化过程中，Spark会分别创建DAGScheduler作业调度和TaskScheduler任务调度两级调度模块。  </p>
+<p>作业调度模块是基于任务阶段的高层调度模块，它为每个Spark作业计算具有依赖关系的多个调度阶段（通常根据shuffle来划分），然后为每个阶段构建出一组具体的任务（通常会考虑数据的本地性等），然后以TaskSets（任务组）的形式提交给任务调度模块来具体执行。  </p>
+<p>任务调度模块则负责具体启动任务、监控和汇报任务运行情况。</p>
+</blockquote>
+<p><em>不同运行模式的区别主要体现在任务调度模块。不同的部署和运行模式，根据底层资源调度方式的不同，各自实现了自己特定的任务调度模块，用来将任务实际调度给对应的计算资源。</em></p>
+<h5 id="-">相关基本类</h5>
+<ul>
+<li>TaskScheduler / SchedulerBackend</li></ul>
+<p>为了抽象出一个公共的接口供DAGScheduler作业调度模块使用，所有的这些运行模式实现的任务调度模块都是基于这两个接口（Trait）的：TaskScheduler（见程序1）及SchedulerBackend（见程序2）。</p>
+<pre><code>程序1
+private[spark] trait TaskScheduler {
+  def rootPool: Pool
+  def schedulingMode: SchedulingMode
+  def start(): Unit
+  def postStartHook() { }
+  def stop(): Unit
+
+  // 提交待运行的任务集
+  def submitTasks(taskSet: TaskSet): Unit
+
+  // 取消一个调度阶段的所有任务
+  def cancelTasks(stageId: Int, interruptThread: Boolean)
+
+  // 设置DAG scheduler 用来回调相关函数
+  def setDAGScheduler(dagScheduler: DAGScheduler): Unit
+
+  // 默认的并行度，作为决定作业并行度的一个参考
+  def defaultParallelism(): Int
+}
+</code></pre><blockquote>
+<p>TaskScheduler的实现主要用于与DAGScheduler交互，负责任务的具体调度和运行，其核心接口是submitTasks和cancelTasks。</p>
+</blockquote>
+<pre><code>程序2
+ private[spark] trait SchedulerBackend {
+  def start(): Unit
+  def stop(): Unit
+  def reviveOffers(): Unit
+  def defaultParallelism(): Int
+
+  def killTask(taskId: Long, executorId: String, interruptThread: Boolean): Unit =
+    throw new UnsupportedOperationException
+}
+</code></pre><blockquote>
+<p>SchedulerBackend的实现是与底层资源调度系统交互（如Mesos/YARN），配合TaskScheduler实现具体任务执行所需的资源分配，核心接口是receiveOffers。</p>
+</blockquote>
+<ul>
+<li>TaskSchedulerImpl  </li></ul>
+<pre><code>TaskSchedulerImpl实现了TaskScheduler接口，提供了大多数本地和分布式运行调度模式的任务调度接口。
+
+private[spark] class TaskSchedulerImpl(
+    val sc: SparkContext,
+    val maxTaskFailures: Int,
+    isLocal: Boolean = false)
+  extends TaskScheduler with Logging 
+
+此外它还实现了resourceOffers和statusUpdate这两个接口供Backend调用，用于提供调度资源和更新任务状态。
+
+def resourceOffers(offers: Seq[WorkerOffer]): Seq[Seq[TaskDescription]]
+def statusUpdate(tid: Long, state: TaskState, serializedData: ByteBuffer)
+
+另外，在提交任务和更新状态等阶段，TaskSchedulerImpl都会调用Backend的receiveOffers函数，用于发起一次任务资源调度请求 。
+</code></pre><ul>
+<li>Executor  </li></ul>
+<p>实际任务的运行，最终都由Executor类来执行，Executor对每一个任务创建一个TaskRunner类，交给线程池运行，如程序3所示。</p>
+<pre><code>程序3
+  // 启动线程池
+  val threadPool = Utils.newDaemonCachedThreadPool(&quot;Executor task launch worker&quot;)
+
+  // 运行任务列表
+  private val runningTasks = new ConcurrentHashMap[Long, TaskRunner]
+
+   def launchTask(context: ExecutorBackend, taskId: Long, serializedTask: ByteBuffer) {
+    val tr = new TaskRunner(context, taskId, serializedTask)
+    runningTasks.put(taskId, tr)
+    threadPool.execute(tr)
+  }
+
+运行的结果通过ExecutorBackend接口返回。
+
+private[spark] trait ExecutorBackend {
+  def statusUpdate(taskId: Long, state: TaskState, data: ByteBuffer)
+}
+</code></pre><h4 id="local-">Local模式</h4>
+<h5 id="-">部署及程序运行</h5>
+<p>Local模式，顾名思义就是在本地运行，如果不加任何配置，Spark默认设置为Local模式。以SparkPi为例，Local模式下的应用程序的启动命令如下：</p>
+<pre><code>./bin/run-example org.apache.spark.examples.SparkPi local
+</code></pre><h5 id="-">内部实现原理</h5>
+<p>Local本地模式使用LocalBackend配合TaskSchedulerImpl，内部逻辑结构下图所示。</p>
+<p><img src="http://attach.dataguru.cn/attachments/portal/201503/26/104814ospbbbxjrsnxzz6b.jpg" alt="Local模式逻辑结构框图"></p>
+<p>LocalBackend响应Scheduler的receiveOffers请求，根据可用的CPU核的设定值[N]直接生成CPU资源返回给Scheduler，并通过Executor类在线程池中依次启动和运行Scheduler返回的任务列表，其核心事件循环由内部类LocalActor以Akka Actor的消息处理形式来实现。</p>
+<p>因为Local模式无须配置，同时所有的代码都在本地进程中执行，所以常常可以作为快速验证代码和跟踪调试的手段。</p>
+<h4 id="standalone-">Standalone模式</h4>
+<h5 id="-">部署及程序运行</h5>
+<p>在Spark Standalone模式中，Spark集群由Master节点和Worker节点构成，用户程序通过与Master节点交互，申请所需的资源，Worker节点负责具体Executor的启动运行。</p>
+<p>Standalone模式的部署也很简单，你只需要将编译好的或下载的Spark发布版本复制到打算用来构建Spark集群的各个节点上即可，为了方便通过启动脚本使用，部署的路径最好一致。</p>
+<ul>
+<li>通过命令手动启动集群</li></ul>
+<pre><code>可以在打算作为Master的节点上运行：
+#./sbin/start-master.sh
+
+接下来在打算作为Worker的节点上启动一个或多个Worker，启动命令如下：
+./bin/spark-class org.apache.spark.deploy.worker.Worker spark:// MasterURL:PORT
+</code></pre><ul>
+<li>通过脚本启动集群  </li></ul>
+<p>要通过脚本启动Standalone的Spark集群，首先需要在Spark的Conf目录下创建一个文件名为slaves的文件，该文件包含了你需要启动Worker的节点的主机名（或IP），按行分隔。同时Master节点必须能通过SSH秘钥登录的形式访问Worker节点（也就是说不需用户手动输入密码）。</p>
+<p>配置好slaves文件以后，你就可以通过下列脚本来启动、停止Standalone模式的Spark集群了：</p>
+<pre><code>sbin/start-master.sh：在执行该脚本的机器上启动一个Spark Master实例。
+
+sbin/start-slaves.sh：在slaves文件中指定的每一个节点上启动一个或多个Spark Worker实例。
+
+sbin/start-all.sh：执行上述两步。
+
+sbin/stop-master.sh：关闭由sbin/start-master.sh 脚本启动的Master实例。
+
+sbin/stop-slaves.sh：关闭由sbin/start-slaves.sh脚本启动的Worker实例。
+
+sbin/stop-all.sh：执行上述两步。
+</code></pre><ul>
+<li>集群参数配置  </li></ul>
+<p>通过conf/spark-env.sh配置环境变量，你可以进一步控制Spark集群的运行参数，在conf目录下，有一份模板spark-env.sh.template可以作为你配置的参考文件，当修改完成你所需的spark-env.sh文件后，你需要将它复制到所有的Worker节点上使其生效。下面列出了一些主要的可供配置的参数：</p>
+<pre><code>SPARK_MASTER_IP： Master节点的IP地址。
+
+SPARK_MASTER_PORT：Spark Master的工作端口（默认为7077）。
+
+SPARK_MASTER_WEBUI_PORT：Master节点监控网页的端口（默认为8080）。
+
+SPARK_WORKER_PORT：Spark Worker的工作端口（默认为随机）。
+
+SPARK_WORKER_DIR：Spark应用程序，包括Log记录等使用的目录（默认为 SPARK_HOME/work）。
+
+PARK_WORKER_CORES：Spark Worker管理的CPU核的数量（默认为使用所有核）。
+
+SPARK_WORKER_MEMORY：Spark Worker管理的内存的数量（默认为总内存减1GB）。
+
+SPARK_WORKER_WEBUI_PORT：Spark Worker的网页端口（默认为8081）。
+
+SPARK_WORKER_INSTANCES：每个物理节点所运行的Worker进程的数量（默认为1），通过配置这个参数，你可以在一台机器上运行多个Spark Worker进程，但是需要注意的是，你需要对应地调整每个Worker所管理的CPU核和内存的数量。
+
+SPARK_DAEMON_MEMORY：Spark Master和Spark Worker自己所使用的内存的大小（默认为512MB）。
+
+SPARK_DAEMON_JAVA_OPTS：传递给Spark Master和Spark Worker的JVM参数。
+</code></pre><pre><code>以SparkPi为例，Standalone模式下的应用程序启动命令如下：
+./bin/run-example org.apache.spark.examples.SparkPi spark://10.0.2.31:7077
+</code></pre><h5 id="-">内部实现原理</h5>
+<p>如下图所示，Standalone模式使用SparkDeploySchedulerBackend配合TaskSched- ulerImpl工作，而SparkDeploySchedulerBackend本身拓展自CoarseGrainedSchedulerBackend。</p>
+<p><img src="http://attach.dataguru.cn/attachments/portal/201503/26/141024s3llttnv9t9aanu5.jpg" alt="Standalone模式逻辑结构框图"></p>
+<p>CoarseGrainedSchedulerBackend是一个基于Akka Actor实现的粗粒度的资源调度类，在整个Spark作业运行期间，CoarseGrainedSchedulerBackend会监听并持有注册给它的Executor资源（相对于细粒度的调度，Executor基于每个任务的生命周期创建和销毁），并且在接受Executor注册、状态更新、响应Scheduler请求等各种时刻，根据现有Executor资源发起任务调度流程 。</p>
+<p>Executor本身是可以通过各种途径启动的，对应的，在Spark Standalone模式中，SparkDeploySchedulerBackend通过Client类向Spark Master 发送请求，在独立部署的Spark集群中启动CoarseGrainedExecutorBackend，根据所需的CPU资源的数量，一个或多个CoarseGrainedExecutorBackend在Spark Worker节点上启动并注册给CoarseGrainedSchedulerBackend的Driver Actor。</p>
+<p>完成所需Actor的启动后，任务调度就在CoarseGrainedSchedulerBackend和CoarseGrainedExecutorBackend的Actor之间直接完成。</p>
+<h4 id="local-cluster-">Local cluster模式</h4>
+<h5 id="-">部署及程序运行</h5>
+<p>Local cluster伪分布式模式，实际是在SparkContext初始化的过程中，在本地启动一个所有服务都在单机上运行的伪分布Spark集群，所以从部署的角度来说无须做任何准备工作。以SparkPi为例，伪分布式模式下的应用程序的启动命令的示例如下：</p>
+<pre><code>./bin/run-example org.apache.spark.examples.SparkPi local-cluster[2,2,1024]
+//上面的伪分布式模式启动两个Worker，每个Worker管理两个CPU核和1024MB的内存。
+</code></pre><h5 id="-">内部实现原理</h5>
+<p>伪分布模式是基于Standalone模式来实现的，除了启动Master（主进程）和Worker（工作进程）的位置与Standalone不同（全部在本地启动），在集群启动完毕后，后续应用程序的工作流程及资源的调度流程与Standalone模式完全相同。逻辑结构框图如下图所示。</p>
+<p><img src="http://attach.dataguru.cn/attachments/portal/201503/26/141024s3llttnv9t9aanu5.jpg" alt="Local Cluster模式逻辑结构框图"></p>
+<h4 id="yarn-standalone-yarn-cluster-">YARN standalone/YARN cluster模式</h4>
+<h5 id="-">部署及程序运行</h5>
+<p>YARN cluster模式，顾名思义就是通过Hadoop YARN框架来调度Spark应用所需的资源。YARN standalone这个名字是在0.9之前的版本使用的，在1.0以后改名为YARN cluster。</p>
+<ul>
+<li>打包  </li></ul>
+<p>对于Spark来说，需要做的准备工作包括通过sbt assembly命令将所有的依赖关系打包成一个大的JAR包供YARN调度框架使用</p>
+<p>所获得的JAR包，可以上传到HDFS中，也可以放在本地。同样的，你的应用程序本身也需要打包成JAR包供YARN调度框架使用。</p>
+<ul>
+<li>配置  </li></ul>
+<p>对于YARN模式来说，还有一些特定的参数可以通过Conf文件或编程直接配置，用于调整运行时的行为，如下所示。</p>
+<pre><code>spark.yarn.applicationMaster.waitTries：尝试等待Spark Master启动和初始化完成的次数，默认为10。
+
+spark.yarn.submit.file.replication：Spark应用程序的依赖文件上传到HDFS时，在HDFS中的备份的拷贝数量
+
+spark.yarn.preserve.staging.files：在应用程序结束后是否保留上述上传的文件。
+
+spark.yarn.scheduler.heartbeat.interval-ms：Spark Application Master向YARN  ResourceManager 发送心跳（Heartbeat）的时间间隔，默认为5秒。
+
+spark.yarn.max.worker.failures：在认为一个应用程序运行失败之前，允许运行失败的Worker的最大数量。
+</code></pre><p>在YARN cluster模式下，需要通过额外的辅助程序来启动应用:</p>
+<pre><code>以SparkPi为例:
+$ SPARK_JAR=./assembly/target/scala-2.10/spark-assembly-0.9.1-hadoop2.2.0.jar \
+    ./bin/spark-class org.apache.spark.deploy.yarn.Client \
+      --jar examples/target/scala-2.10/spark-examples-assembly-0.9.1.jar \
+      --class org.apache.spark.examples.SparkPi \
+      --args yarn-standalone \
+      --num-workers 3 \
+      --master-memory 4g \
+      --worker-memory 2g \
+      --worker-cores 1
+</code></pre><h5 id="-">内部实现原理</h5>
+<p>YARN cluster模式原理，相对于其他模式有些特殊，它需要由外部程序辅助启动APP。用户的应用程序通过辅助的YARN Client类启动。</p>
+<p>1.Client类通过YARN Client API提交请求在Hadoop集群上启动一个Spark ApplicationMaster<br>2.Spark ApplicationMaster首先注册自己为一个YARN Application Master，之后启动用户程序<br>3.SparkContext在用户程序中初始化时，使用CoarseGrainedSchedulerBackend配合YARNClusterScheduler</p>
+<blockquote>
+<p>YARNClusterScheduler只是对TaskSchedulerImpl的一个简单包装，增加了对Executor的等待逻辑等。</p>
+</blockquote>
+<p>4.根据Client类传递的参数，Spark ApplicationMaster通过YARN ResourceManager/ NodeManager的接口在集群中启动若干个Container（容器），用于运行CoarseGrained- Executor-Backend。<br>5.CoarseGrainedExecutorBackend在启动过程中会向CoarseGrained- SchedulerBackend注册。之后的任务调度流程同上述其他Cluster模式。</p>
+<p><img src="http://attach.dataguru.cn/attachments/portal/201503/26/145100nx4qzbyxn3t3vxxk.jpg" alt=" YARN cluster模式逻辑结构框图"></p>
+<h4 id="yarn-client-">YARN client模式</h4>
+<h5 id="-">部署及程序运行</h5>
+<p>YARN client模式的部署准备工作和YARN standalone模式完全一致。</p>
+<ul>
+<li>环境变量</li></ul>
+<p>由于YARN client模式对用户不直接暴露前面提到的用于提交YARN程序的辅助程序，所以许多参数是通过环境变量来设置的，可以配置的环境变量如下：</p>
+<pre><code>SPARK_JAR：Spark自身JAR包的路径。
+
+SPARK_WORKER_INSTANCES：需要启动的Worker的数量（默认为2）。
+
+SPARK_WORKER_CORES：每个Worker使用的CPU Core的数量（默认为1）
+
+SPARK_WORKER_MEMORY：每个Worker使用的内存数量（默认为1GB）
+
+SPARK_MASTER_MEMORY：Master节点的内存大小（默认为512 MB）
+
+SPARK_YARN_APP_NAME：应用程序在YARN框架中使用的名字（默认为Spark）
+
+SPARK_YARN_QUEUE：资源分配时使用的YARN的队列（默认为&#39;default&#39;）
+
+SPARK_YARN_DIST_FILES：需要随作业分发到集群上的文件。
+
+SPARK_YARN_DIST_ARCHIVES：需要随作业分发到集群上的压缩包。
+</code></pre><blockquote>
+<p>这些环境变量可以在spark-env.sh中配置，也可以在启动应用时设置</p>
+</blockquote>
+<pre><code>以SparkPi为例，使用YARN client模式运行SparkPi:
+SPARK_JAR=./assembly/target/scala-2.10/spark-assembly-0.9.1-hadoop2.2.0.jar \
+SPARK_YARN_APP_JAR=examples/target/scala-2.10/spark-examples-assembly-0.9.1.jar \
+./bin/run-example org.apache.spark.examples.SparkPi yarn-client
+</code></pre><h5 id="-">内部实现原理</h5>
+<p>YARN client模式与YARN cluster模式的区别：<br>在YARN cluster模式中，应用程序（包括Spark- Context）都是作为YARN框架所需要的Application Master，在由YARN ResourceManager为其分配的一个随机节点上运行。而在YARN client模式中，SparkContext运行在本地。</p>
+<p>如下图所示的YARN client模式中，SparkContext在初始化过程中启动YARNClientSchedulerBackend（同样拓展自CoarseGrainedSchedulerBackend），该Backend进一步调用org.apache.spark.deploy.yarn.Client在远程启动一个WorkerLauncher作为Spark的Application Master，相比于YARN standalone模式，WorkerLauncher不再负责用户程序的启动（已经在客户端本地启动），而只是启动Container运行CoarseGrainedExecutorBackend与客户端本地的Driver进行通信，后续任务调度流程相同。</p>
+<p><img src="http://attach.dataguru.cn/attachments/portal/201503/26/145205k8zrs7kc6janksjd.jpg" alt="YARN client模式逻辑结构框图"></p>
+
+</body>
+</html>
+<!-- This document was created with MarkdownPad, the Markdown editor for Windows (http://markdownpad.com) -->

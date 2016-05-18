@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>快学Scala笔记——scala数据结构，操作及高级类型</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+/* GitHub stylesheet for MarkdownPad (http://markdownpad.com) */
+/* Author: Nicolas Hery - http://nicolashery.com */
+/* Version: b13fe65ca28d2e568c6ed5d7f06581183df8f2ff */
+/* Source: https://github.com/nicolahery/markdownpad-github */
+
+/* RESET
+=============================================================================*/
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* BODY
+=============================================================================*/
+
+body {
+  font-family: Helvetica, arial, freesans, clean, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  background-color: #fff;
+  padding: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+body>*:first-child {
+  margin-top: 0 !important;
+}
+
+body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* BLOCKS
+=============================================================================*/
+
+p, blockquote, ul, ol, dl, table, pre {
+  margin: 15px 0;
+}
+
+/* HEADERS
+=============================================================================*/
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 20px 0 10px;
+  padding: 0;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 tt, h1 code, h2 tt, h2 code, h3 tt, h3 code, h4 tt, h4 code, h5 tt, h5 code, h6 tt, h6 code {
+  font-size: inherit;
+}
+
+h1 {
+  font-size: 28px;
+  color: #000;
+}
+
+h2 {
+  font-size: 24px;
+  border-bottom: 1px solid #ccc;
+  color: #000;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+h4 {
+  font-size: 16px;
+}
+
+h5 {
+  font-size: 14px;
+}
+
+h6 {
+  color: #777;
+  font-size: 14px;
+}
+
+body>h2:first-child, body>h1:first-child, body>h1:first-child+h2, body>h3:first-child, body>h4:first-child, body>h5:first-child, body>h6:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+h1+p, h2+p, h3+p, h4+p, h5+p, h6+p {
+  margin-top: 10px;
+}
+
+/* LINKS
+=============================================================================*/
+
+a {
+  color: #4183C4;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* LISTS
+=============================================================================*/
+
+ul, ol {
+  padding-left: 30px;
+}
+
+ul li > :first-child, 
+ol li > :first-child, 
+ul li ul:first-of-type, 
+ol li ol:first-of-type, 
+ul li ol:first-of-type, 
+ol li ul:first-of-type {
+  margin-top: 0px;
+}
+
+ul ul, ul ol, ol ol, ol ul {
+  margin-bottom: 0;
+}
+
+dl {
+  padding: 0;
+}
+
+dl dt {
+  font-size: 14px;
+  font-weight: bold;
+  font-style: italic;
+  padding: 0;
+  margin: 15px 0 5px;
+}
+
+dl dt:first-child {
+  padding: 0;
+}
+
+dl dt>:first-child {
+  margin-top: 0px;
+}
+
+dl dt>:last-child {
+  margin-bottom: 0px;
+}
+
+dl dd {
+  margin: 0 0 15px;
+  padding: 0 15px;
+}
+
+dl dd>:first-child {
+  margin-top: 0px;
+}
+
+dl dd>:last-child {
+  margin-bottom: 0px;
+}
+
+/* CODE
+=============================================================================*/
+
+pre, code, tt {
+  font-size: 12px;
+  font-family: Consolas, "Liberation Mono", Courier, monospace;
+}
+
+code, tt {
+  margin: 0 0px;
+  padding: 0px 0px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+}
+
+pre>code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent;
+}
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px;
+}
+
+pre code, pre tt {
+  background-color: transparent;
+  border: none;
+}
+
+kbd {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #DDDDDD;
+    background-image: linear-gradient(#F1F1F1, #DDDDDD);
+    background-repeat: repeat-x;
+    border-color: #DDDDDD #CCCCCC #CCCCCC #DDDDDD;
+    border-image: none;
+    border-radius: 2px 2px 2px 2px;
+    border-style: solid;
+    border-width: 1px;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    line-height: 10px;
+    padding: 1px 4px;
+}
+
+/* QUOTES
+=============================================================================*/
+
+blockquote {
+  border-left: 4px solid #DDD;
+  padding: 0 15px;
+  color: #777;
+}
+
+blockquote>:first-child {
+  margin-top: 0px;
+}
+
+blockquote>:last-child {
+  margin-bottom: 0px;
+}
+
+/* HORIZONTAL RULES
+=============================================================================*/
+
+hr {
+  clear: both;
+  margin: 15px 0;
+  height: 0px;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  border-bottom: 4px solid #ddd;
+  padding: 0;
+}
+
+/* TABLES
+=============================================================================*/
+
+table th {
+  font-weight: bold;
+}
+
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 6px 13px;
+}
+
+table tr {
+  border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+table tr:nth-child(2n) {
+  background-color: #f8f8f8;
+}
+
+/* IMAGES
+=============================================================================*/
+
+img {
+  max-width: 100%
+}
+</style>
+<style type="text/css">
+.highlight  { background: #ffffff; }
+.highlight .c { color: #999988; font-style: italic } /* Comment */
+.highlight .err { color: #a61717; background-color: #e3d2d2 } /* Error */
+.highlight .k { font-weight: bold } /* Keyword */
+.highlight .o { font-weight: bold } /* Operator */
+.highlight .cm { color: #999988; font-style: italic } /* Comment.Multiline */
+.highlight .cp { color: #999999; font-weight: bold } /* Comment.Preproc */
+.highlight .c1 { color: #999988; font-style: italic } /* Comment.Single */
+.highlight .cs { color: #999999; font-weight: bold; font-style: italic } /* Comment.Special */
+.highlight .gd { color: #000000; background-color: #ffdddd } /* Generic.Deleted */
+.highlight .gd .x { color: #000000; background-color: #ffaaaa } /* Generic.Deleted.Specific */
+.highlight .ge { font-style: italic } /* Generic.Emph */
+.highlight .gr { color: #aa0000 } /* Generic.Error */
+.highlight .gh { color: #999999 } /* Generic.Heading */
+.highlight .gi { color: #000000; background-color: #ddffdd } /* Generic.Inserted */
+.highlight .gi .x { color: #000000; background-color: #aaffaa } /* Generic.Inserted.Specific */
+.highlight .go { color: #888888 } /* Generic.Output */
+.highlight .gp { color: #555555 } /* Generic.Prompt */
+.highlight .gs { font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #aaaaaa } /* Generic.Subheading */
+.highlight .gt { color: #aa0000 } /* Generic.Traceback */
+.highlight .kc { font-weight: bold } /* Keyword.Constant */
+.highlight .kd { font-weight: bold } /* Keyword.Declaration */
+.highlight .kp { font-weight: bold } /* Keyword.Pseudo */
+.highlight .kr { font-weight: bold } /* Keyword.Reserved */
+.highlight .kt { color: #445588; font-weight: bold } /* Keyword.Type */
+.highlight .m { color: #009999 } /* Literal.Number */
+.highlight .s { color: #d14 } /* Literal.String */
+.highlight .na { color: #008080 } /* Name.Attribute */
+.highlight .nb { color: #0086B3 } /* Name.Builtin */
+.highlight .nc { color: #445588; font-weight: bold } /* Name.Class */
+.highlight .no { color: #008080 } /* Name.Constant */
+.highlight .ni { color: #800080 } /* Name.Entity */
+.highlight .ne { color: #990000; font-weight: bold } /* Name.Exception */
+.highlight .nf { color: #990000; font-weight: bold } /* Name.Function */
+.highlight .nn { color: #555555 } /* Name.Namespace */
+.highlight .nt { color: #000080 } /* Name.Tag */
+.highlight .nv { color: #008080 } /* Name.Variable */
+.highlight .ow { font-weight: bold } /* Operator.Word */
+.highlight .w { color: #bbbbbb } /* Text.Whitespace */
+.highlight .mf { color: #009999 } /* Literal.Number.Float */
+.highlight .mh { color: #009999 } /* Literal.Number.Hex */
+.highlight .mi { color: #009999 } /* Literal.Number.Integer */
+.highlight .mo { color: #009999 } /* Literal.Number.Oct */
+.highlight .sb { color: #d14 } /* Literal.String.Backtick */
+.highlight .sc { color: #d14 } /* Literal.String.Char */
+.highlight .sd { color: #d14 } /* Literal.String.Doc */
+.highlight .s2 { color: #d14 } /* Literal.String.Double */
+.highlight .se { color: #d14 } /* Literal.String.Escape */
+.highlight .sh { color: #d14 } /* Literal.String.Heredoc */
+.highlight .si { color: #d14 } /* Literal.String.Interpol */
+.highlight .sx { color: #d14 } /* Literal.String.Other */
+.highlight .sr { color: #009926 } /* Literal.String.Regex */
+.highlight .s1 { color: #d14 } /* Literal.String.Single */
+.highlight .ss { color: #990073 } /* Literal.String.Symbol */
+.highlight .bp { color: #999999 } /* Name.Builtin.Pseudo */
+.highlight .vc { color: #008080 } /* Name.Variable.Class */
+.highlight .vg { color: #008080 } /* Name.Variable.Global */
+.highlight .vi { color: #008080 } /* Name.Variable.Instance */
+.highlight .il { color: #009999 } /* Literal.Number.Integer.Long */
+.pl-c {
+    color: #969896;
+}
+
+.pl-c1,.pl-mdh,.pl-mm,.pl-mp,.pl-mr,.pl-s1 .pl-v,.pl-s3,.pl-sc,.pl-sv {
+    color: #0086b3;
+}
+
+.pl-e,.pl-en {
+    color: #795da3;
+}
+
+.pl-s1 .pl-s2,.pl-smi,.pl-smp,.pl-stj,.pl-vo,.pl-vpf {
+    color: #333;
+}
+
+.pl-ent {
+    color: #63a35c;
+}
+
+.pl-k,.pl-s,.pl-st {
+    color: #a71d5d;
+}
+
+.pl-pds,.pl-s1,.pl-s1 .pl-pse .pl-s2,.pl-sr,.pl-sr .pl-cce,.pl-sr .pl-sra,.pl-sr .pl-sre,.pl-src,.pl-v {
+    color: #df5000;
+}
+
+.pl-id {
+    color: #b52a1d;
+}
+
+.pl-ii {
+    background-color: #b52a1d;
+    color: #f8f8f8;
+}
+
+.pl-sr .pl-cce {
+    color: #63a35c;
+    font-weight: bold;
+}
+
+.pl-ml {
+    color: #693a17;
+}
+
+.pl-mh,.pl-mh .pl-en,.pl-ms {
+    color: #1d3e81;
+    font-weight: bold;
+}
+
+.pl-mq {
+    color: #008080;
+}
+
+.pl-mi {
+    color: #333;
+    font-style: italic;
+}
+
+.pl-mb {
+    color: #333;
+    font-weight: bold;
+}
+
+.pl-md,.pl-mdhf {
+    background-color: #ffecec;
+    color: #bd2c00;
+}
+
+.pl-mdht,.pl-mi1 {
+    background-color: #eaffea;
+    color: #55a532;
+}
+
+.pl-mdr {
+    color: #795da3;
+    font-weight: bold;
+}
+
+.pl-mo {
+    color: #1d3e81;
+}
+.task-list {
+padding-left:10px;
+margin-bottom:0;
+}
+
+.task-list li {
+    margin-left: 20px;
+}
+
+.task-list-item {
+list-style-type:none;
+padding-left:10px;
+}
+
+.task-list-item label {
+font-weight:400;
+}
+
+.task-list-item.enabled label {
+cursor:pointer;
+}
+
+.task-list-item+.task-list-item {
+margin-top:3px;
+}
+
+.task-list-item-checkbox {
+display:inline-block;
+margin-left:-20px;
+margin-right:3px;
+vertical-align:1px;
+}
+</style>
+</head>
+<body>
+<h2 id="-scala-scala-">快学Scala笔记——scala数据结构，操作及高级类型</h2>
+<h3 id="-">基础</h3>
+<h4 id="-">声明值和变量</h4>
+<pre><code>scala&gt;val answer=8*2+3
+answer:Int=19
+</code></pre><blockquote>
+<p>在Scala中，变量或函数的类型总是写在变量或函数名称的后面.<br>在scala解释器中res变量是val</p>
+<p>val定义常量，var定义变量   </p>
+<p>Scala中，在变量声明或赋值语句后，没有使用分号，仅当同一行代码中存在多条语句时才需要用分号隔开</p>
+</blockquote>
+<h4 id="-">常用类型</h4>
+<ul>
+<li>Scala中有7种数值类型：Byte, Char, Short, Int, Long, Float, Double;1个Boolean类型。   </li><li>这些类型是类<br><a href="http://hongjiang.info/scala-type-and-class/">scala类与类型</a></li></ul>
+<p>对于嵌套类，会出现类相同但类型不同的情况</p>
+<pre><code>scala不刻意区分基本类型与引用类型，可以对数字执行方法
+1.toString()//产出字符串“1”
+</code></pre><blockquote>
+<p>在scala中用方法来做数值之间的转换，而不是强制类型转换。</p>
+</blockquote>
+<h4 id="-">算数和操作符重载</h4>
+<pre><code>a 方法 b 等同于 a.方法（b)
+例如：
+a+b 是 a.+(b)的简写//操作符+是方法
+</code></pre><blockquote>
+<p>Scala不提供++和--操作符 </p>
+</blockquote>
+<h4 id="-">调用函数和方法</h4>
+<ul>
+<li><p>调用数学函数，需要引入scala.math包：<br><code>impot scala.math._  //在Scala中，_字符是“通配符”</code></p>
+</li><li><p>不带参数的Scala方法通常不使用圆括号。<br><code>&quot;Hello&quot;.distinct//获取字符串中不重复的字符</code></p>
+</li><li><p>单例对象，伴生类，伴生对象，apply</p>
+<p>  <a href="http://blog.csdn.net/yyywyr/article/details/50194005">Scala单例对象、伴生类以及伴生对象、apply介绍</a></p>
+<p>  <a href="http://my.oschina.net/sulliy/blog/60289">Scala单例与伴生对象</a></p>
+<p>  <a href="http://www.tuicool.com/articles/qaq6nau">学习Scala：伴生对象的实现原理</a></p>
+</li></ul>
+<blockquote>
+<p>str(),str.take(),str.charAt()区别<br>    val s:String = &quot;Hello&quot;<br>    println(s(1))//输出e<br>    println(s.take(1))//输出H<br>    println(s.charAt(1))//输出e，这种写法是JAVA里的</p>
+</blockquote>
+<h4 id="-">练习</h4>
+<ul>
+<li>Scala中如何获取字符串的首字符和尾字符  </li></ul>
+<pre><code>//获取首字符  
+&quot;Hello&quot;(0)  
+&quot;Hello&quot;.take(1)  
+//获取尾字符  
+&quot;Hello&quot;.reverse(0)  
+&quot;Hello&quot;.takeRight(1)
+</code></pre><h3 id="-">控制结构和函数</h3>
+<h4 id="-">条件表达式</h4>
+<ul>
+<li>Scala中if/else表达式有值，这个值就是跟在if或else之后的表达式的值。</li></ul>
+<pre><code>val s=if (x&gt;0) 1 else -1//等同于
+if (x&gt;0) s=1 else s=-1
+//第一种学法可以用来初始化一个val，而第二种写法中必须是var
+</code></pre><ul>
+<li>Scala中每一个表达式都有一个类型</li></ul>
+<pre><code>if (x&gt;0) 1 else -1//类型为Int
+if (x&gt;0) &quot;positive&quot; else -1
+//这个表达式的类型是两个分支类型的公共超类型。一个分支是java.lang.String, 另一个是Int.它们的公共超类型叫做Any.
+if (x&gt;0) 1//等同于
+if (x&gt;0) 1 else ()
+//else部分缺失,if语句可能没有输出值,引入一个Unit类，写做()  
+//可以把()当做“无有用值”的占位符
+</code></pre><blockquote>
+<p>Scala没有switch语句</p>
+</blockquote>
+<h4 id="-">块表达式和赋值</h4>
+<ul>
+<li>在Scala中，{}块包含一系列表达式，其结果也是一个表达式，块中的最后一个表达式的值就是块的值。</li></ul>
+<blockquote>
+<p>在Scala中赋值动作本身是没有值的——更严格的说，它们的值是Unit类型的。</p>
+</blockquote>
+<pre><code>//由于赋值语句的值是Unit类型的，别这样做！！
+x=y=1
+//y=1的值是(),x的值是()
+</code></pre><h4 id="-">输入和输出</h4>
+<ul>
+<li>输出</li></ul>
+<pre><code>print()//打印
+println()//打印后换行
+printf//C风格格式化字符串
+</code></pre><ul>
+<li>输入</li></ul>
+<p>readInt, readDouble, readByte, readShort, readFloat. readBoolean, readChar, readLine(带一个参数作为提示字符串)：</p>
+<pre><code>val name =readLine(&quot;your name:&quot;)
+print(&quot;Your age:&quot;)
+val age =readInt()
+printf(&quot;Hello,%s! Next year, you will be %d.\n&quot;,name,age+1)
+</code></pre><h4 id="-">循环</h4>
+<ul>
+<li><p>Scala的while和do循环与Java和C++相同</p>
+</li><li><p>Scala没有与for循环直接对应的结构，Scala的for循环用法如下：</p>
+</li></ul>
+<pre><code>for(i&lt;-表达式)
+//让变量i遍历&lt;-右边的表达式的所有值。至于这个遍历具体如何执行，取决于表达式的类型。对于Scala集合比如Range而言，这个循环会让i依次取得区间中的每个值。
+
+//例子
+scala&gt; :paste
+//Entering paste mode &lt;ctrl-D to finish&gt;
+
+var r:Int=1
+for (i&lt;-1 to 10)
+r=r*i
+
+//Exiting paste mode, mow interpreting.
+
+r:Int=3628800
+</code></pre><p><strong>遍历字符串或数组时，通常需要使用从0到n-1的区间。until方法返回一个不包含上限的区间。</strong></p>
+<h3 id="-for-">高级for循环</h3>
+<ul>
+<li>在for循环中可以以变量&lt;-表达式的形式提供多个生成器，用分号将他们隔开，同时每个生成器都可以带一个守卫，以if开头的Boolean表达式：</li></ul>
+<pre><code>for (i&lt;-1 to 3; j&lt;-1 to 3 if i!=j) print((10*i+j)+&quot;&quot;)
+//注意在if之前没有分号
+//将打印12 13 32 23 31 32
+</code></pre><ul>
+<li>如果for循环的循环体以yield开始，该循环会构造出一个集合，每次迭代生成集合中的一个值：</li></ul>
+<pre><code>for (i&lt;- 1 to 10) yield i % 3
+//生成Vector(1,2,0,1,2,0,1,2,0,1)
+</code></pre><blockquote>
+<p>这类循环叫for推导式，for推导式生成的集合与第一个生成器是类型兼容的。</p>
+</blockquote>
+<p><a href="http://haolloyin.blog.51cto.com/1177454/384397">scala中yield的用法和实例</a></p>
+<h4 id="-">函数</h4>
+<ul>
+<li>定义</li></ul>
+<pre><code>def abs(x:Double) = if (x&gt;=0) x else -x
+</code></pre><blockquote>
+<p>给出函数名称，参数和函数体<br>函数体需要多个表达式完成可以使用代码块，块中最后一个表达式的值就是函数的返回值<br>对于递归函数必须指定返回类型</p>
+</blockquote>
+<ul>
+<li>参数</li></ul>
+<p>默认参数和带名参数</p>
+<pre><code>def decorate(str: String, left: String = &quot;[&quot;, right: String=&quot;]&quot;)=left+ str+ right
+//其中left和right是默认参数
+</code></pre><blockquote>
+<p>调用函数给出参数时可以指定对应参数名，这样函数看起来更清晰</p>
+</blockquote>
+<p>变长参数</p>
+<pre><code>def sum(args: Int*):Int={
+    var result = 0
+    for (arg&lt;- args) result += arg
+    result
+}
+
+val s= sum(1,4,9,16,25)
+//函数得到的是一个类型为Seq（序列）的参数？？？为什么不是Int？？？
+</code></pre><blockquote>
+<p>注意！！！<br>直接传入整数区间是不对的<br><code>val s = sum(1 to 5)//错误</code><br>解决办法：告诉编译器希望这个参数被当做参数序列处理。追加:<em>*<br>```val s = sum (1 to 5 :</em>*)```</p>
+</blockquote>
+<pre><code>//例子：递归的方法求输入字符串的公共字符
+def i(words: String*): String = {
+          if (words.length &lt;= 1) words.head
+          else i(words.tail: _*).intersect(words.head)
+        }
+        //序列的head是它的首个元素，而tail是所有其他元素的序列
+
+println(i(&quot;abc1&quot;,&quot;ab21&quot;,&quot;cccs21&quot;))
+//输出1
+</code></pre><h4 id="-">过程</h4>
+<p>不返回值的函数称为过程，其返回值为Unit</p>
+<pre><code>def helloworld (s: String) {//仔细看：过程没有=
+    var s=“HelloWorld”
+    println(s)
+}
+
+helloworld(&quot;Helloworld&quot;)
+</code></pre><blockquote>
+<p>过程也可以定义为：<code>def helloworld (s: String) :Unit ={
+……
+}</code></p>
+</blockquote>
+<h4 id="-">懒值</h4>
+<pre><code>val words= scala.io.Source.fromFile(&quot;/usr/words&quot;).mkString
+//在words被定义时即被取值
+lazy val words= scala.io.Source.fromFile(&quot;/usr/words&quot;).mkString
+//在words被首次使用时取值
+def words= scala.io.Source.fromFile(&quot;/usr/words&quot;).mkString
+//在每次words被使用时取值
+</code></pre><h4 id="-">异常</h4>
+<p>抛出异常使用throw</p>
+<p>Scala没有“受捡”异常——不需要声明说函数或方法可能会抛出某种异常。</p>
+<p><strong>throw表达式有特殊的类型Nothing</strong></p>
+<pre><code>if (x &gt;= 0) {sqrt (x)
+} else throw new IllegalArgumentException (&quot;x should not be negative&quot;)
+//其中第一个分支类型为Double,第二个分值类型为Nothing。因此if/else表达式的类型是Double
+</code></pre><p><strong>try/catch和try/finally的目的是互补的。前者处理异常，后者在没有异常时执行某种动作，通常是清理工作，可以将其结合：</strong></p>
+<pre><code>try{...} catch{...} finally{...}
+</code></pre><p><a href="http://www.runoob.com/scala/scala-exception-handling.html">scala异常处理</a></p>
+<h4 id="-">练习</h4>
+<blockquote>
+<p>scala中空的块表达式{}的值为（），类型为Unit    </p>
+</blockquote>
+<h3 id="-">数组相关操作</h3>
+<h4 id="-">定长数组</h4>
+<pre><code>val nums = new Array[Int](10)
+//10个整数的数组，所有元素初始化为0
+val a =new Array[String] (10)
+//10个元素的字符串数组，所有元素初始化为null
+val s= Array(&quot;Hello&quot;,&quot;world&quot;)
+//已提供初始值就不需要new
+s(0)=&quot;Hello&quot;
+//使用()而不是[]来访问元素
+</code></pre><h4 id="-arraybuffer">变长数组：数组缓冲——ArrayBuffer</h4>
+<pre><code>import scala.collection.mutable.ArrayBuffer
+val b = ArrayBuffer[Int]()
+//或者new ArrayBuffer[Int] 一个空的数组缓冲
+b+=1
+//ArrayBuffer(1), +=在尾端添加元素
+b+=(1,2,3,5)
+//ArrayBuffer(1,1,2,3,5)
+b++=Array(8,13,21)
+//ArrayBuffer(1,1,2,3,5,8,13,21)
+//可以用++=操作符追加任何集合
+b.trimEnd(5)
+//移除最后五个元素
+//ArrayBuffer(1,1,2)
+b.insert（2,7,8,9）
+//ArrayBuffer(1,1,7，8,9，2)
+//在下标2之前插入7,8,9
+b.remove(2,3)
+//ArrayBuffer(1,1,2)
+//从下标为2的元素开始，删除3个元素
+</code></pre><blockquote>
+<p>trimEnd是一个高效的操作，insert操作并不那么高效<br>Array与ArrayBuffer可以相互转换b.toArray,a.toBuffer</p>
+</blockquote>
+<ul>
+<li>遍历数组</li></ul>
+<pre><code>0 until (a.length, 2)
+//数组a每两个元素一跳访问
+(0 until a.length).reverse
+//数组从后向前遍历
+for(elem&lt;a)
+   println(elem)
+//不需要用到数组下标可以直接访问元素，变量elem先后被设置为a(0),a(1)，以此类推
+</code></pre><h4 id="-">数组转换</h4>
+<p><strong>从一个数组（或数组缓冲）出发，以某种方式对其进行转换不会修改原始数据，而是产生一个全新的数组</strong><br><strong>产生的类型与原始类型相同</strong></p>
+<pre><code>val a = Array (2,3,5,7,11)
+val result = for (elem&lt;- a) yield 2 *elem
+//result是Array(4,6,10,14,22)
+for (elem &lt;- a if elem % 2 ==0) yield 2* elem
+//只处理满足特定条件的元素，用守卫：for中的if实现
+//以下两种做法与其效果相同
+a.filter(_ % 2 == 0).map(2 * _)
+a.filter{_ % 2 == 0} map{2 * _}
+</code></pre><h4 id="-">常用算法</h4>
+<pre><code>Array(1,7,2,9).sum
+//res0:Int = 19
+//对ArrayBuffer同样适用
+//使用sum方法，元素类型必须是数值类型
+
+
+ArrayBuffer(&quot;Mary&quot;,&quot;had&quot;,&quot;a&quot;,&quot;little&quot;,&quot;lamb&quot;).max
+//&quot;little&quot;
+
+val b =ArrayBuffer(1,7,2,9)
+val bSorted = b.sorted
+//sorted方法，排序，不改变原数组
+
+val bDescending = b.sortWith(_&gt;_)
+//ArrayBuffer(9,7,2,1)
+//比较函数，使用sortWith方法
+</code></pre><pre><code>//可以直接对一个数组排序，不能对数组缓冲排序，这种排序改变原数组的内容
+val a = Array (1,7,2,9)
+scala.util.Sorting.quickSort(a)
+//a现在是Array(1,2,7,9)
+</code></pre><p>对于min,max和quickSort方法，元素类型必须支持比较操作。包括数字、字符串以及其他带有Ordered特质的类型。</p>
+<p>显示数组或数组缓冲的内容——mkString方法：</p>
+<pre><code>println(a.mkString(&quot; and &quot;))
+//&quot;1 and 2 and 7 and 9&quot;
+println(a.mkString(&quot;&lt;&quot;,&quot;,&quot;,&quot;&gt;&quot;))
+//&quot;&lt;1,2,7,9&gt;&quot;
+</code></pre><h4 id="-scaladoc">解读scaladoc</h4>
+<p><img src="http://images.cnitblog.com/i/640756/201407/241513409003058.jpg" alt="Scaladoc解码指环"><br><img src="http://images.cnitblog.com/i/640756/201407/241513579634346.jpg" alt="Scaladoc解码指环"><br><strong>多理解多看看！！！</strong></p>
+<h4 id="-">多维数组</h4>
+<p>多维数组是通过数组的数组实现的。举例来说，Double的二维数组类型为Array[Array[Double]].要构造这样一个数组，可以使用ofDim方法：</p>
+<pre><code>val matrix = Array.ofDim[Double](3,4)//三行四列
+matrix(row)(column)//访问二维数组中的元素
+</code></pre><p>创建不规则数组，每行长度各不相同：</p>
+<pre><code>val triangle = new Array[Array[Int]](10)
+for (i&lt;- 0 until triangle.length)
+    triangle(i) = new Array[Int](i+1)
+</code></pre><p><strong>与JAVA的互操作</strong></p>
+<p><a href="http://www.tuicool.com/articles/mUzyeq">Scala支持与Java的隐式转换</a></p>
+<h4 id="-">练习</h4>
+<p>1.编写一段代码，将a设置为一个n个随机整数的数组，要求随机数介于0和n之间。</p>
+<pre><code>object test {
+
+  def main(args:Array[String]): Unit = {
+    makearray(10).foreach(println)
+
+    def makearray (n: Int): Array[Int]=
+    {
+      val a = new Array[Int](n)
+     //val rand= new scala.util.Random()
+     // for(i&lt;-a) yield rand.nextInt(n)
+      for(i&lt;-a) yield  scala.util.Random.nextInt(n)//生成0-n之间的随机数，包含0不包含n
+    }
+  }
+}
+</code></pre><p>2.编写一个循环，将整数数组中相邻的元素置换。</p>
+<pre><code>
+object test {
+
+  def main(args:Array[String]): Unit = {
+
+    val a = Array(1,2,3,4,5)
+    //exarray(a).foreach(println）//为什么这样写会报错？？？
+    exarray(a)
+    a.foreach(println)
+
+    def exarray (arr:Array[Int])=
+    {
+      for(i&lt;- 0 until (arr.length-1, 2)){
+        val t = arr(i)
+        arr(i)=arr(i+1)
+        arr(i+1)=t
+      }
+
+    }
+  }
+}
+</code></pre><blockquote>
+<p>val arr: Array[Int] //arr.sum,arr.length<br>arr.distinct //输出不重复的元素</p>
+</blockquote>
+<h3 id="-">映射和元组</h3>
+<h4 id="-">映射</h4>
+<ul>
+<li>构造映射<br>映射是对偶的集合，对偶是两个值构成的组，这两个值类型可以不同<br>映射这种数据结构是一种将键映射到值的函数，只做查询</li></ul>
+<pre><code>//构造一个不可变的Map[String,Int]
+val scores = Map(&quot;Alice&quot;-&gt;10, &quot;Bob&quot;-&gt;3, &quot;Cindy&quot; -&gt; 8)
+val scores = Map((&quot;Alice&quot;,10), (&quot;Bob&quot;,3), (&quot;Cindy&quot; ,8))//与上一句作用相同
+//构造一个可变映射
+val scores = scala.collection.mutable.Map(&quot;Alice&quot;-&gt;10, &quot;Bob&quot;-&gt;3, &quot;Cindy&quot; -&gt; 8)
+//构造一个空映射
+val scores = new scala.collection.mutable.HashMap[String,Int]
+</code></pre><ul>
+<li>获取映射中的值    </li></ul>
+<pre><code>val bobsScore=scores(&quot;Bob&quot;)
+val bobsScore=if (scores.contains(&quot;Bob&quot;)) scores(&quot;Bob&quot;) else 0
+//检查映射中是否有某个指定的键，用contains方法
+//上一句组合的简写
+val bobsScore = scores.getOrElse(&quot;Bob&quot;,0)
+//如果映射中包含“Bob”键，则返回对应值，否则，返回0
+//映射.get(键)这样的调用返回一个option对象
+</code></pre><ul>
+<li>更新映射中的值    </li></ul>
+<p>可变映射</p>
+<pre><code>scores(&quot;Bob&quot;)=10 //更新键Bob对应的值
+scores(&quot;Fred&quot;)=7 //增加新的键值对
+scores+=(&quot;Bob&quot;-&gt;10,&quot;Fred&quot;-&gt;7)//用+=操作添加多个关系
+scores-=&quot;Alice&quot;//用-=操作移除某个键及其对应的值
+</code></pre><p>不可变映射</p>
+<pre><code>val newScores = scores + (&quot;Bob&quot;-&gt;10,&quot;Fred&quot;-&gt;7)//在原映射基础上更新，生成一个新映射
+
+//可以更新var变量
+var scores = ...
+scores = scores + (&quot;Bob&quot;-&gt;10,&quot;Fred&quot;-&gt;7)
+
+//从不可变映射中移除某个键同理，用-操作符
+</code></pre><ul>
+<li>迭代映射  </li></ul>
+<pre><code>//遍历映射中所有的键值对
+for ((k, v)&lt;- 映射)  处理k和v
+
+//只需要访问键或值使用keySet和values方法，values方法返回一个Iterable
+scores.keySet //一个类似Set(&quot;Bob&quot;,&quot;Cindy&quot;.&quot;Fred&quot;,&quot;Alice&quot;)这样的集
+for (v&lt;- soucres.values) println(v)//打印10 8 7 10这样的组合
+
+//反转一个映射——交换键和值的位置：
+for ((k, v)&lt;- 映射) yield (v,k)
+</code></pre><ul>
+<li>已排序映射<br>在操作映射时，需要选定一个实现——哈希表或者平衡树，scala默认情况为哈希表。</li></ul>
+<pre><code>//得到一个不可变的树形映射
+val scores = scala.colleciton.immutable.SortedMap(&quot;Alice&quot;-&gt;10, &quot;Bob&quot;-&gt;3, &quot;Cindy&quot; -&gt; 8)
+</code></pre><blockquote>
+<p>按插入顺序访问所有键，使用LinkedHashMap</p>
+</blockquote>
+<h4 id="-tuple">元组——tuple</h4>
+<p>对偶是元组的最简单形态——元组是不同类型的值的聚集</p>
+<pre><code>val t =(1,3.14,&quot;Fred&quot;)//一个元组
+val second = t._2//将3.14赋值给second，可以用方法_1,_2,_3访问元组元素
+//t._2=t _2(用空格代替句点)
+
+//使用模式匹配来获取元组的组元
+val (first, second, third)=t//first为1，second为3.14 ...
+
+//如果不是所有部件都需要，可以在不需要的位置上使用_
+val (first, second, _) = t
+</code></pre><blockquote>
+<p>StringOps的partition方法返回一堆字符串，分别包含满足和不满足某个条件的字符<br>&quot;New York&quot;.partition(_.isUpper) //输出对偶（“NY“，”ew ork&quot;)</p>
+</blockquote>
+<h4 id="-">拉链操作</h4>
+<pre><code>val symbols = Array(&quot;&lt;&quot;,&quot;-&quot;.&quot;&gt;&quot;)
+val counts = Array(2,10,2)
+val pairs = symbols.zip(counts)
+//输出对偶的数组：
+Array((&quot;&lt;&quot;,2),(&quot;-&quot;,10),(&quot;&gt;&quot;,2))
+//然后这些对偶就可以一起被处理：
+for ((s,n)&lt;- pairs) Console.print(s*n)//打印&lt;&lt;----------&gt;&gt;
+</code></pre><blockquote>
+<p>用toMap方法可以将对偶的集合转换成映射</p>
+</blockquote>
+<h3 id="-">集合</h3>
+<p><strong>集合有三大类，分别为序列、集和映射</strong></p>
+<p><img src="http://hongjiang.info/wp-content/uploads/2013/11/scala-collections.jpg" alt="scala集合框架"></p>
+<ul>
+<li>主要的集合特质<br><img src="http://img.blog.csdn.net/20150220154802488?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZXNjYWZsb25l/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt="scala结合继承层级中的关键特质"></li></ul>
+<p>Iterator不是一个集合，用来访问集合中所有元素</p>
+<pre><code>val coll = ... // 某种Iterable  
+val iter = coll.iterator  
+while(iter.hasNext)  
+    对iter.next()执行某种操作
+</code></pre><p>Seq是一个有先后次序的值的序列，比如数组或列表。<br>IndexedSeq允许我们通过整形的下标快速访问任意元素，如ArrayBuffer是带下标的。<br>Set是一组没有先后次序的值，在SortedSet中，元素以某种排过序的顺序被访问。<br>Map是一组（K,V）对偶，SortedMap按照键的排序访问。   </p>
+<blockquote>
+<p>IndexedSeq是数组的超类型，但不是列表的超类型。</p>
+</blockquote>
+<pre><code>//每个Scala集合特质或类，都有一个带有apply方法的伴生对象，这个apply方法可以用来构建该集合中的实例。  
+Iterable(0xFF, 0xFF00, 0xFF0000)  
+set(color.RED, color.GREEN, Color.BLUE)  
+Map(color.RED -&gt; -0xFF0000, Color.GREEN -&gt; 0xFF00, Color.BLUE -&gt; 0xFF)  
+SortedSet(&quot;Hello&quot; , &quot;World&quot;)
+</code></pre><ul>
+<li>可变和不可变集合</li></ul>
+<pre><code>scala.collection.mutable.Map    //可变  
+scala.collection.immutable.Map //不可变   
+scala.collection.Map //超类  
+
+//Scala优先采用不可变集合， scala.collection 包中的伴生对象产出不可变的集合
+scala.collection.Map(&quot;Hello&quot; -&gt; 42) //不可变映射  
+
+//用Map得到不可变，用mutable.Map得到可变的
+
+//因为Scala包和Predef对象总是被引入，他们都指向不可变特质的类型别名List、Set和Map.  
+//Preedef.Map和scala.collection.immutable.Map是一回事
+</code></pre><ul>
+<li>序列<br><img src="http://img.blog.csdn.net/20150311091152705" alt="不可变序列"></li></ul>
+<blockquote>
+<p>Vector是ArrayBuffer的不可变版本，一个带下标的序列，支持快捷的随机访问，以树形结构的形式实现,每个节点可以有不超过32个子节点。</p>
+</blockquote>
+<p><strong>vetcor和Array一样吗？？？</strong></p>
+<blockquote>
+<p>Range表示一个整数序列，只存储起始值，结束值和增值， 用 to 和 until 方法来构造Range对象。</p>
+</blockquote>
+<p><img src="http://img.blog.csdn.net/20150311091554489" alt="可变序列"></p>
+<ul>
+<li>列表  </li></ul>
+<p>列表要么是Nil(空表)，要么是一个head元素和一个tail，tail又是一个列表。 </p>
+<pre><code>val digits = List(4,2)  //digits.head为4，digits.tail为List(2)。再进一步，digits.tail.head为2，而digits.tail.tail为Nil
+
+
+:: 操作符从给定的头和尾创建一个新的列表。  
+9 :: List(4,2) // List(9,4,2)  
+9 :: 4 :: 2 :: Nil  // :: 是右结合，列表从末端开始构建  
+9 :: ( 4 :: (2 :: Nil ) )  
+
+//链表的遍历可以使用迭代，也可以使用递归和模式匹配
+def sum(lst : List[Int]): Int =   
+  if( lst == Nil) 0 else lst.head + sum(lst.tail)  
+
+def sum(lst:List[Int]): Int = lst match{  
+  case Nil =&gt; 0  
+  case h :: t =&gt; h+sum(t) // h 是 lst.head， 而t是lst.tail, ::将列表“析构”成头部和尾部  
+}  
+
+
+直接使用List的方法  
+List(9,4,2).sum //输出15
+</code></pre><ul>
+<li>可变列表</li></ul>
+<p>LinkedList, elem指向当前值，next指向下一个元素<br>DoubleLinkedList多带一个prev  </p>
+<pre><code>val lst = scala.collection.mutable.LinkedList(1,-2,7,-9)  
+var cur = lst  
+while(cur != Nil){  
+  if(cur.elem&lt;0) cur.elem = 0  
+  cur = cur.next  
+} // (1,0,7,0) ，将所有负值改为0  
+var cur = lst   
+while(cur != Nil &amp;&amp; cur.next != Nil){  
+  cur.next = cur.next.next  
+  cur = cur.next  
+}// 去除每两个元素中的一个
+</code></pre><blockquote>
+<p>注：当要把某个节点变为列表中的最后一个节点，不能将next 设为Nil 或 null, 而将它设为LinkedList.empty。  </p>
+</blockquote>
+<ul>
+<li>集    </li></ul>
+<p>不重复元素的集合，以哈希集实现，元素根据hashCode方法的值进行组织  </p>
+<pre><code>//尝试将已有元素加入集没有效果
+Set(2,0,1) + 1 // (2,0,1) 
+
+//LinkedHashSet，链式哈希集 记住元素被插入的顺序  
+val weekdays = scala.collection.mutable.LinkedHashSet(1,2,3,4)
+</code></pre><p>位集(bit set), 以一个字位序列的方式存放非负整数，如果集中有i，则第i个字位是1<br>这是个高效的实现，只要最大元素不是特别大。<br>Scala提供 可变和不可变的两个 BitSet类  </p>
+<pre><code>//contains 检查是否包含， subsetOf 检查集的所有元素是否被另一个集包含  
+val digits = Set(1,7,2,9)  
+digits contains 0 // false  
+Set(1,2) subsetOf digits // true
+</code></pre><pre><code>//union intersect diff 方法，也可写作| ,&amp;, &amp;~  
+//union 还可以写成 ++, diff 写作 --  
+val primes = Set(2, 3, 5, 7)  
+digits union primes // Set(1,2,3,5,7,9)  
+digits &amp; primes // Set (2,7)  
+digits -- primes // Set(1,9)
+</code></pre><ul>
+<li>用于添加或去除元素的操作符      </li></ul>
+<p><img src="http://img.blog.csdn.net/20150311100827192" alt="用于添加和移除元素的操作符"></p>
+<pre><code>一般而言，+用于将元素添加到无先后次序的集合，而+:和:+则是将元素添加到有先后次序的集合的开头或末尾。  
+Vector(1,2,3) :+ 5 //Vector(1,2,3,5)  
+1 +: Vector(1,2,3) //Vector(1,1,2,3)   
+以冒号结尾的操作符，+:是右结合的，这些操作符都返回新的集合  
+
+可变集合有 +=操作符 用于修改左侧操作元  
+val numbers = ArrayBuffer(1,2,3)  
+numbers += 5 // 将 5 添加到 numbers  
+
+不可变集合，可以在var上使用+=或:+=  
+var numbers = Set(1,2,3)  
+numbers += 5 // numbers 设为不可变的集numbers + 5  
+var numberVector = Vector(1,2,3)  
+numbersVector :+= 5 // 向量没有+操作符，只有:+  
+
+移除元素  
+Set(1,2,3) -2 // Set(1,3)  
+
+++来一次添加多个元素， -- 一次移除多个元素  
+col1 ++ col2
+</code></pre><p><img src="http://img.blog.csdn.net/20150311101559999" alt="操作符汇总"></p>
+<p><a href="http://www.scala-lang.org/api/current/#scala.collection.mutable.Iterable">Iterable特质APi</a></p>
+<ul>
+<li>将函数映射到集合</li></ul>
+<pre><code>map方法  
+val names = List(&quot;Peter&quot; , &quot;Paul&quot;, &quot;Mary&quot;)  
+names.map(_.toUpperCase) // 等同于 for(n &lt;- names) yield n.toUpperCase  
+
+flatMap方法，如果函数产出一个集合，又想将所有值串联在一起  
+def ulcase(s:String) = Vector(s.toUpperCase(), s.toLowerCase())  
+names.map(ulcase)  
+//得到List(Vector(&quot;PETER&quot;,&quot;peter&quot;), Vector(&quot;PAUL&quot;,&quot;paul&quot;), Vector(&quot;MARY&quot;,&quot;mary&quot;))  
+names.flatMap(ulcase) 
+//得到List(&quot;PETER&quot;,&quot;peter&quot;,&quot;PAUL&quot;,&quot;paul&quot;,&quot;MARY&quot;,&quot;mary&quot;)  
+
+collect 方法用于偏函数 partial function，那些并没有对所有可能的输入值进行定义的函数， 产出被定义的所有参数的函数值的集合  
+&quot;-3+4&quot;.collect(case &#39;+&#39; -&gt; 1; case &#39;-&#39; -&gt; -1) // vector(-1,1)  
+
+foreach方法  
+names.foreach(println)
+</code></pre><ul>
+<li>化简、折叠和扫描</li></ul>
+<p>用二元函数来组合集合中的元素</p>
+<pre><code>List(1,7,2,9).reduceLeft(_ - _)   
+//( ( 1 - 7 ) - 2 ) - 9 = 1- 7 - 2 - 9 = -17
+//从左向右结合
+
+List(1,7,2,9).reduceRight(_ - _)   
+//1 - ( 7 - ( 2 - 9  ) ) = 1-7 + 2 -9 = -13  
+//从右向左结合
+
+以不同首元素开始计算  
+List(1,7,2,9).foldLeft(0)(_ - _)  //coll.foldLeft(init)(op)
+//0-1-7-2-9 = -19  
+List(1,7,2,9).foldLeft(&quot; &quot;)(_ + _) 
+// 由柯里化判断第二个参数类型定义(String, Int) =&gt; String  
+//&quot; &quot; +1 + 7+2+9 = &quot; 1729&quot;  
+
+
+(0 /: List(1,7,2,9))(_ - _) //  /:操作符代替了foldLeft操作  
+Scala 也提供了foldRight 和 :\的变体
+</code></pre><blockquote>
+<p>柯里化<br><a href="http://www.tuicool.com/articles/mEJviy">scala柯里化函数</a><br><a href="http://www.zhihu.com/question/30097211/answer/46785556">如何理解functional programming里的currying与partial application?</a></p>
+</blockquote>
+<pre><code>折叠有时可以代替循环，比如计算字母出现频率  
+val freq = scala.collection.mutable.Map[Char, Int]() 
+// 可变映射  
+for( c &lt;- &quot;Mississippi&quot;)   
+  freq(c) =freq.getOrElse(c,0)+1 
+// Map(&#39;i&#39; -&gt;4, &#39;M&#39; -&gt; 1, &#39;s&#39; -&gt; 4, &#39;p&#39; -&gt;2)  
+
+折叠实现  
+(Map[Char, Int]() /:&quot;Mississippi&quot;){  
+  (m,c) =&gt; m + (c -&gt; (m.getOrElse(c,0) +1)  
+}
+// 这里的 Map是不可变，每次计算出一个新的Map  
+
+
+scanLeft,scanRight， 得到包含所有中间结果的集合  
+(1 to 10).scanLeft(0)(_ + _)  
+Vector(0,1,3,6,10,15,21,28,36,45,55)
+</code></pre><ul>
+<li>拉链操作</li></ul>
+<p><strong>化简、折叠和扫描是将操作对应到同一个集合中的相邻元素；<br>拉链操作是将两个集合的对应元素结合到一起</strong></p>
+<pre><code>zip  
+val prices = List(5.0,20.0,9.95) // 价格  
+val quantities = List(10,2,1)     //数量  
+prices zip quantities 
+//得到一个List[(Double, Int)] , 一个个对偶的列表  
+//List[(Double, Int)] = List( (5.0, 10), (20.0, 2 ), (9.95, 1))  
+
+//计算总价  
+( (prices zip quantities) map {p =&gt; p._1 * p._2}) sum  
+
+//如果两个集合数量不一致,结果中的对偶数量和较短的那个结合的元素数量相同  
+List( 5.0, 20.0, 9.95 ) zip List(10, 2) 
+// List((5.0, 10), (20.0, 2))  
+
+zipAll 指定短列表的缺省值：第二个参数补充左边，第三个参数补充右边  
+List(1,1).zipAll(List(2),6,7) // List((1,2),(1,7))  
+List(1).zipAll(List(2,3),6,7)// List((1,2), (6,3))  
+
+zipWithIndex， 返回对偶列表，第二个组成部分是元素下标  
+&quot;Scala&quot;.zipWithIndex // Vector((&#39;S&#39;,0),(&#39;c&#39;,1),(&#39;a&#39;,2),(&#39;l&#39;,3),(&#39;a&#39;,4))  
+求最大编码的值的 下标为  
+&quot;Scala&quot;.zipWithIndex.max._2  //res0:Int=3
+</code></pre><ul>
+<li>迭代器    </li></ul>
+<p>对于那些完整构造需要很大开销的集合，适合用迭代器<br>如Source.fromFile产出一个迭代器，因为整个文件加载进内存不高效。 </p>
+<pre><code>迭代器的两种用法  
+while(iter.hasNext)  
+  对iter.next() 执行某种操作  
+for(elem &lt;- iter)  
+  对elem 执行某种操作  
+
+//上述两种循环都会讲迭代器移动到集合末端，不能再被使用，  
+//调用 map filter count sum length方法后，迭代器也会位于集合的末端，不能使用  
+//find 或 take， 迭代器位于找到的元素之后
+</code></pre><ul>
+<li>流</li></ul>
+<p><strong>迭代器每次调用next都会改变指向，如果要缓存之前的值，可以使用流</strong><br><strong>流是一个尾部被懒计算的不可变列表，也就是说只有需要时才计算</strong></p>
+<pre><code>def numsForm(n:BigInt) : Stream[BigInt] = n #:: numsForm(n+1) 
+// #:: 操作符 构建出来的是一个流  
+var tenOrMore = numsForm(10) // Stream(10,?), 其尾部是未被求值的 
+tenOrMore.tail.tail.tail // Stream(13,?)  
+val squares = numsForm(1).map( x=&gt; x*x) // Stream(1,?)
+
+
+take 可以一次获得多个值， force强制求值  
+squares.take(5).force // Stream(1,4,9,16,25)  
+squares.force // 会尝试对一个无穷流的所有成员求值，最后OutOfMemoryError
+</code></pre><p>迭代器可以用来构造一个流<br>Source.getLines返回一个Iterator[String]，用这个迭代器，对于每一行只能访问一次，而流将缓存访问过的行，允许重新访问 </p>
+<pre><code>val words = Sourcce.fromFile(&quot;/usr/share/dict/words&quot;).getLines.toStream  
+words // Stream(A, ?)  
+words(5) // Aachen  
+words // Stream(A, A&#39;o, AOL, AOL&#39;s, Aachen, ?)
+</code></pre><ul>
+<li>懒视图(应用于集合)</li></ul>
+<p>类似流的懒理念<br>与流的不同<br>1、连第一个元素都不会求值<br>2、不会缓存求过的值</p>
+<pre><code>val powers = (0 until 1000).view.map(pow(10,_))  
+powers(100) 
+// pow(10,100)被计算，其他值未计算，同时也不缓存，下次pow(10,100)将重新计算
+</code></pre><p>force方法可以对懒视图强制求值，得到与原集合相同类型的新集合，<br>懒试图的好处：可以避免在多种变换下产生的中间集合</p>
+<pre><code>(0 to 1000).map(pow(10,_)).map(1/_)
+//先第一个map,再第二个map, 构建了一个中间集合  
+(0 to 1000).view.map(pow(10,_)).map(1/_).force 
+// 记住两个map操作，每个元素被两个操作同时执行，不需要额外构中间集合
+</code></pre><ul>
+<li>与JAVA的互操作</li></ul>
+<pre><code>import scala.collection.JavaConversions._  
+val props:scala.collection.mutable.Map[String,String] = System.getProperties()  
+//如果担心那些不需要的隐式转换也被引入的话，只引入需要的即可  
+import scala.collection.JavaConversions.propertiesAsScalaMap  
+
+这些转换产出的是包装器，让你可以使用目标接口来访问原本的值  
+props(&quot;name&quot;) = &quot;clat&quot; //props既是包装器  
+包装器将调用底层Properties对象的put(&quot;name&quot;,&quot;clat&quot;)
+</code></pre><p><img src="http://img.blog.csdn.net/20150311162116555" alt="scala与JAVA集合的互操作"></p>
+<ul>
+<li>线程安全的集合    </li></ul>
+<p>Scala类库提供了六个特质，将他们混入集合，让集合的操作变成同步<br>SynchromizedBuffer<br>SynchromizedMap<br>SynchromizedPriorityQueue<br>SynchromizedQueue<br>SynchromizedSet<br>SynchromizedStack  </p>
+<pre><code>val scores =new scala.collection.collection.mutable.HashMap[String, Int] with scala.collection.mutalbe.SynchronizzedMap[String,Int]  
+注：这里可以确保scores不会被破坏，任何操作都必须先完成，其他线程才可执行另一个操作。但并发修改和遍历集合并不安全。
+</code></pre><blockquote>
+<p>通常来说，最好使用java.util.concurrent包中的类. 不同线程可以并发访问数据结构中互不相关的部分。</p>
+</blockquote>
+<ul>
+<li>并行集合</li></ul>
+<p>为了更好利用计算机的多个处理器，支持并发通常是必需的  </p>
+<pre><code>如果coll是个大型集合，那么  
+coll.par.sum  //并发求和，par方法产出当前集合的一个并行实现，该实现会尽可能地并行执行集合方法  
+coll.par.count(_ % 2 ==0) //计算偶数的数量
+</code></pre><blockquote>
+<p>对数组、缓冲、哈希表、平衡树而言，并行实现会直接重用底层实际集合的实现，所以很高效。  </p>
+</blockquote>
+<pre><code>可以通过对要遍历的集合应用.par并行化for循环  
+for( i &lt;- (0 until 100).par) print( i + &quot; &quot; ) //数字是按照作用于该任务的线程产出的顺序输出  
+
+在for/yield循环中，结果是依次组装的  
+for( i &lt;- (0 until 100).par) yield i +&quot; &quot;
+</code></pre><blockquote>
+<p>par返回的并行集合扩展自ParSeq ParSet Parmap，都是ParIterable的子类型，不是Iterable的子类型，所以不能将并行集合传递给预期Iterable Seq Set Map的方法。<br>可以用ser方法将并行集合转换回串行的版本。  </p>
+</blockquote>
+<pre><code>只有可以自由结合的操作 可以用平行集合  
+(a op b) op c = a op( b op c)， 加是可自由结合的  
+(a -b ) -c != a - (b -c)  减法不是自由结合
+</code></pre><pre><code>有一个fold方法对集合的不同部分进行操作，但是不像foldLeft和foldRight那样灵活，  
+该操作符的两个操作元都必须是集合的元素类型，要求fold的参数类型与集合元素一样，不像上面foldLeft，参数是String, 集合是Int 那样  
+coll.par.fold(0)(_ + _)  
+
+aggregate方法，可以解决上面的问题，该操作符应用于集合的不同部分，然后再用你另一个操作符组合结果  
+str.par.aggregate(Set[Char]())(_ + _, _ ++ _) 
+//等同于 str.foldLeft(Set[Char]())(_ + _)  
+//产出一个str中所有不同字符的集
+</code></pre><p><strong>认真理解aggregate！！！！！！！！</strong></p>
+<h4 id="-">练习</h4>
+<p>1.编写一个函数，给定字符串，产出一个包含所有字符的下标的映射。举例来说，indexes（&quot;Mississippi&quot;）应返回一个映射，让&#39;M&#39;对应集{0}，&#39;i&#39;对应集{1,4,7,10}，以此类推。使用字符到可变集的映射。另外，你如何保证集是经过排序的？</p>
+<pre><code>package com.doggie
+import scala.math._
+import collection.mutable.Map
+import collection.mutable.HashMap
+import collection.mutable.SortedSet
+
+object HelloWorld {
+  def main(args:Array[String]):Unit= {
+
+    def excier (str:String):Map[Char, SortedSet[Int]]={
+      var remap= new HashMap[Char, SortedSet[Int]]()
+      var i:Int = 0
+      str.foreach {
+        c =&gt;
+          remap.get(c) match {
+            case Some(result) =&gt; remap(c) = result + i
+            case None =&gt; remap += (c -&gt; SortedSet{i})
+          }
+          i += 1
+      }
+     remap
+    }
+  println(excier(&quot;Mississippi&quot;))
+  }
+}
+</code></pre><blockquote>
+<p>  <a href="http://nanxiao.me/scala-function-instance-sugar/">Scala的“=&gt;”符号简介</a></p>
+</blockquote>
+<h3 id="-">高级类型</h3>
+<h4 id="-">单例类型</h4>
+<p><a href="http://hongjiang.info/scala-type-system-singleton-type/">scala类型系统： 单例类型与this.type</a></p>
+<p>给定任何引用v，你可以得到类型v.type，它有两个可能值v和null。</p>
+<p>通过返回this的方法，把方法调用串联起来：</p>
+<pre><code>class Document {
+    def setTitle (title: String) = {...; this}
+    def setAuthor (author: String) = {...; this}
+    ...
+}
+然后可以实现
+article.setTitle(&quot;Whatever Floats Your Boat&quot;).setAuthor(&quot;Cay Horstmann&quot;)
+
+
+//但是如果还有子类，这种写法就会出错
+class Book extends Document {
+    def addChapter(chapter: String) = {...; this}
+    ...
+}
+val book = new Book()
+book.setTitle(&quot;scala for the impatient&quot;).addChapter(chapter1)//错误
+//setTitle返回的是this，scala将返回类型推断为Document,但Document并没有addChapter方法
+
+//解决方法：声明setTitle的返回类型为this.type
+def setTitle(title: String): this.type ={...; this}
+//这样，book.setTitle(&quot;...&quot;)的返回类型就是book.type，由于book有一个addChapter方法，方法串接就能成功了
+</code></pre><blockquote>
+<p>定义一个接受object实例作为参数的方法，也可以使用单例类型</p>
+</blockquote>
+<h4 id="-">类型投影</h4>
+<p>在scala里，内部类型(排除定义在object内部的)，想要表达所有的外部类A实例路径下的B类型，即对 a1.B 和 a2.B及所有的 an.B类型找一个共同的父类型，这就是类型投影，用 A#B的形式表示。</p>
+<pre><code>示例：
+import scala.collection.mutable.ArrayBuffer
+class Network{
+    class Member (val name : String){
+        val contacts = new ArrayBuffer[Member]
+    }
+
+    private val members = new ArryaBuffer[Member]
+
+    def join(name: String) = {
+        val m = new Member(name)
+        members+=m
+        m
+    }
+}
+
+对于以下两个网络chatter.Member和myFace.Member是不同的类
+val chatter = new Network
+val myFace = new Network
+
+val fred = chatter.join(&quot;Fred&quot;)//类型为chatter.Member
+val barney= myFace.join(&quot;Barney&quot;)//类型为myFace.Member
+fred.contact += barney //错误，所属类不同
+
+
+如果不希望有如上约束，可以使用类型投影Network#Member,意思是&quot;任何Network的Member&quot;
+</code></pre><blockquote>
+<p>投影类型并不会被当做“路径”，也无法引入</p>
+</blockquote>
+<h4 id="-">路径</h4>
+<pre><code>com.horstmann.impatient.Network.Member//这样的表达式成为路径
+</code></pre><p><strong>在最后的类型之前，路径的所有组成部分都必须是稳定的，也就是说，它必须指定到单个、有穷的范围。</strong></p>
+<h4 id="-">类型别名</h4>
+<p>对于复杂类型，可以用type关键字创建一个简单的别名：</p>
+<pre><code>class Book {
+    import scala.collection.mutable._
+    type Index = HashMap[String, (Int, Int)]
+    ...
+}
+//scala.collection.mutable.HashMap[String, (Int, Int)]可以用Book.Index代替
+</code></pre><blockquote>
+<p>类型别名必须被嵌套在类或对象中，不能出现在scala文件的顶层（REPL可以，其所有内容都隐式包含在一个顶层对象中）<br>type关键字同样被用于那些在子类中被具体化的抽象类型</p>
+</blockquote>
+<h4 id="-">结构类型</h4>
+<p>结构类型(structural type)为静态语言增加了部分动态特性，使得参数类型不再拘泥于某个已命名的类型，只要参数中包含结构中声明的方法或值即可。</p>
+<p>所谓的“结构类型”指的是一组关于抽象方法、字段和类型的规格说明，这些抽象方法、字段和类型是满足该规则的类型必须具备的。</p>
+<pre><code>//以下是一个带有一个结构类型参数target的方法
+def appendLines (target: {def append (str: String): Any}, lines:Iterable[String]){
+    for (l&lt;- lines) {target.append(l);target.append(&quot;/n&quot;)}
+}
+</code></pre><h4 id="-">复合类型</h4>
+<p>复合类型又叫交集类型，要想成为复合类型的实例，某个值必须满足每一个类型要求</p>
+<pre><code>定义：
+T1 with T2 with T3...//T1等是类型
+
+trait ImageShape extends Shape with Serializable
+//ImageShape扩展自交集类型Shape with Serializable
+</code></pre><h4 id="-">中置类型</h4>
+<pre><code>String Map Int
+Map[String, Int]//两者相同
+</code></pre><blockquote>
+<p>所有中置类型操作符都拥有相同的优先级，左结合，除非以：结尾<br>中置类型的名称可以是任何操作符字符的序列（除了单个<em>），为了避免与变长参数声明T</em>混淆</p>
+</blockquote>
+<h4 id="-">存在类型</h4>
+<pre><code>//以下两者相同
+Array[T] forSome ( type T&lt;: JComponet)
+Array[_&lt;：JComponet]
+
+//以下两者相同
+Map[_,_]
+Map[T,U] forSome { type T; type U}
+</code></pre><blockquote>
+<p>接下来说说类型的上界和下界，它们的含义如下。<br>1)U &gt;: T<br>这是类型下界的定义，也就是U必须是类型T的父类(或本身，自己也可以认为是自己的父类)。<br>2)S &lt;: T<br>这是类型上界的定义，也就是S必须是类型T的子类（或本身，自己也可以认为是自己的子类)。</p>
+</blockquote>
+<h4 id="-">抽象类型</h4>
+<pre><code>trait Reader {
+    type Contents
+    def read(fileName: String): Contents
+}
+
+在这里，类型Contents是抽象的。具体的子类需要指定这个类型：
+class StringReader extends Reader {
+    type Contents = String
+    def read(fileName: String) = Source.fromFile(fileName, &quot;UTF-8&quot;).mkString
+}
+
+同样的效果也可以通过类型参数来实现：
+trait Reader[C] {
+    def read(fileName: String): C
+}
+
+class StringReader extends Reader[String] {
+    def read(fileName: String) = Source.fromFile(fileName, &quot;UTF-8&quot;).mkString
+}
+</code></pre>
+</body>
+</html>
+<!-- This document was created with MarkdownPad, the Markdown editor for Windows (http://markdownpad.com) -->

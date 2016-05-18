@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Spark系统概述及编程接口</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+/* GitHub stylesheet for MarkdownPad (http://markdownpad.com) */
+/* Author: Nicolas Hery - http://nicolashery.com */
+/* Version: b13fe65ca28d2e568c6ed5d7f06581183df8f2ff */
+/* Source: https://github.com/nicolahery/markdownpad-github */
+
+/* RESET
+=============================================================================*/
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* BODY
+=============================================================================*/
+
+body {
+  font-family: Helvetica, arial, freesans, clean, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  background-color: #fff;
+  padding: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+body>*:first-child {
+  margin-top: 0 !important;
+}
+
+body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* BLOCKS
+=============================================================================*/
+
+p, blockquote, ul, ol, dl, table, pre {
+  margin: 15px 0;
+}
+
+/* HEADERS
+=============================================================================*/
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 20px 0 10px;
+  padding: 0;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 tt, h1 code, h2 tt, h2 code, h3 tt, h3 code, h4 tt, h4 code, h5 tt, h5 code, h6 tt, h6 code {
+  font-size: inherit;
+}
+
+h1 {
+  font-size: 28px;
+  color: #000;
+}
+
+h2 {
+  font-size: 24px;
+  border-bottom: 1px solid #ccc;
+  color: #000;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+h4 {
+  font-size: 16px;
+}
+
+h5 {
+  font-size: 14px;
+}
+
+h6 {
+  color: #777;
+  font-size: 14px;
+}
+
+body>h2:first-child, body>h1:first-child, body>h1:first-child+h2, body>h3:first-child, body>h4:first-child, body>h5:first-child, body>h6:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+h1+p, h2+p, h3+p, h4+p, h5+p, h6+p {
+  margin-top: 10px;
+}
+
+/* LINKS
+=============================================================================*/
+
+a {
+  color: #4183C4;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* LISTS
+=============================================================================*/
+
+ul, ol {
+  padding-left: 30px;
+}
+
+ul li > :first-child, 
+ol li > :first-child, 
+ul li ul:first-of-type, 
+ol li ol:first-of-type, 
+ul li ol:first-of-type, 
+ol li ul:first-of-type {
+  margin-top: 0px;
+}
+
+ul ul, ul ol, ol ol, ol ul {
+  margin-bottom: 0;
+}
+
+dl {
+  padding: 0;
+}
+
+dl dt {
+  font-size: 14px;
+  font-weight: bold;
+  font-style: italic;
+  padding: 0;
+  margin: 15px 0 5px;
+}
+
+dl dt:first-child {
+  padding: 0;
+}
+
+dl dt>:first-child {
+  margin-top: 0px;
+}
+
+dl dt>:last-child {
+  margin-bottom: 0px;
+}
+
+dl dd {
+  margin: 0 0 15px;
+  padding: 0 15px;
+}
+
+dl dd>:first-child {
+  margin-top: 0px;
+}
+
+dl dd>:last-child {
+  margin-bottom: 0px;
+}
+
+/* CODE
+=============================================================================*/
+
+pre, code, tt {
+  font-size: 12px;
+  font-family: Consolas, "Liberation Mono", Courier, monospace;
+}
+
+code, tt {
+  margin: 0 0px;
+  padding: 0px 0px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+}
+
+pre>code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent;
+}
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px;
+}
+
+pre code, pre tt {
+  background-color: transparent;
+  border: none;
+}
+
+kbd {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #DDDDDD;
+    background-image: linear-gradient(#F1F1F1, #DDDDDD);
+    background-repeat: repeat-x;
+    border-color: #DDDDDD #CCCCCC #CCCCCC #DDDDDD;
+    border-image: none;
+    border-radius: 2px 2px 2px 2px;
+    border-style: solid;
+    border-width: 1px;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    line-height: 10px;
+    padding: 1px 4px;
+}
+
+/* QUOTES
+=============================================================================*/
+
+blockquote {
+  border-left: 4px solid #DDD;
+  padding: 0 15px;
+  color: #777;
+}
+
+blockquote>:first-child {
+  margin-top: 0px;
+}
+
+blockquote>:last-child {
+  margin-bottom: 0px;
+}
+
+/* HORIZONTAL RULES
+=============================================================================*/
+
+hr {
+  clear: both;
+  margin: 15px 0;
+  height: 0px;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  border-bottom: 4px solid #ddd;
+  padding: 0;
+}
+
+/* TABLES
+=============================================================================*/
+
+table th {
+  font-weight: bold;
+}
+
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 6px 13px;
+}
+
+table tr {
+  border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+table tr:nth-child(2n) {
+  background-color: #f8f8f8;
+}
+
+/* IMAGES
+=============================================================================*/
+
+img {
+  max-width: 100%
+}
+</style>
+<style type="text/css">
+.highlight  { background: #ffffff; }
+.highlight .c { color: #999988; font-style: italic } /* Comment */
+.highlight .err { color: #a61717; background-color: #e3d2d2 } /* Error */
+.highlight .k { font-weight: bold } /* Keyword */
+.highlight .o { font-weight: bold } /* Operator */
+.highlight .cm { color: #999988; font-style: italic } /* Comment.Multiline */
+.highlight .cp { color: #999999; font-weight: bold } /* Comment.Preproc */
+.highlight .c1 { color: #999988; font-style: italic } /* Comment.Single */
+.highlight .cs { color: #999999; font-weight: bold; font-style: italic } /* Comment.Special */
+.highlight .gd { color: #000000; background-color: #ffdddd } /* Generic.Deleted */
+.highlight .gd .x { color: #000000; background-color: #ffaaaa } /* Generic.Deleted.Specific */
+.highlight .ge { font-style: italic } /* Generic.Emph */
+.highlight .gr { color: #aa0000 } /* Generic.Error */
+.highlight .gh { color: #999999 } /* Generic.Heading */
+.highlight .gi { color: #000000; background-color: #ddffdd } /* Generic.Inserted */
+.highlight .gi .x { color: #000000; background-color: #aaffaa } /* Generic.Inserted.Specific */
+.highlight .go { color: #888888 } /* Generic.Output */
+.highlight .gp { color: #555555 } /* Generic.Prompt */
+.highlight .gs { font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #aaaaaa } /* Generic.Subheading */
+.highlight .gt { color: #aa0000 } /* Generic.Traceback */
+.highlight .kc { font-weight: bold } /* Keyword.Constant */
+.highlight .kd { font-weight: bold } /* Keyword.Declaration */
+.highlight .kp { font-weight: bold } /* Keyword.Pseudo */
+.highlight .kr { font-weight: bold } /* Keyword.Reserved */
+.highlight .kt { color: #445588; font-weight: bold } /* Keyword.Type */
+.highlight .m { color: #009999 } /* Literal.Number */
+.highlight .s { color: #d14 } /* Literal.String */
+.highlight .na { color: #008080 } /* Name.Attribute */
+.highlight .nb { color: #0086B3 } /* Name.Builtin */
+.highlight .nc { color: #445588; font-weight: bold } /* Name.Class */
+.highlight .no { color: #008080 } /* Name.Constant */
+.highlight .ni { color: #800080 } /* Name.Entity */
+.highlight .ne { color: #990000; font-weight: bold } /* Name.Exception */
+.highlight .nf { color: #990000; font-weight: bold } /* Name.Function */
+.highlight .nn { color: #555555 } /* Name.Namespace */
+.highlight .nt { color: #000080 } /* Name.Tag */
+.highlight .nv { color: #008080 } /* Name.Variable */
+.highlight .ow { font-weight: bold } /* Operator.Word */
+.highlight .w { color: #bbbbbb } /* Text.Whitespace */
+.highlight .mf { color: #009999 } /* Literal.Number.Float */
+.highlight .mh { color: #009999 } /* Literal.Number.Hex */
+.highlight .mi { color: #009999 } /* Literal.Number.Integer */
+.highlight .mo { color: #009999 } /* Literal.Number.Oct */
+.highlight .sb { color: #d14 } /* Literal.String.Backtick */
+.highlight .sc { color: #d14 } /* Literal.String.Char */
+.highlight .sd { color: #d14 } /* Literal.String.Doc */
+.highlight .s2 { color: #d14 } /* Literal.String.Double */
+.highlight .se { color: #d14 } /* Literal.String.Escape */
+.highlight .sh { color: #d14 } /* Literal.String.Heredoc */
+.highlight .si { color: #d14 } /* Literal.String.Interpol */
+.highlight .sx { color: #d14 } /* Literal.String.Other */
+.highlight .sr { color: #009926 } /* Literal.String.Regex */
+.highlight .s1 { color: #d14 } /* Literal.String.Single */
+.highlight .ss { color: #990073 } /* Literal.String.Symbol */
+.highlight .bp { color: #999999 } /* Name.Builtin.Pseudo */
+.highlight .vc { color: #008080 } /* Name.Variable.Class */
+.highlight .vg { color: #008080 } /* Name.Variable.Global */
+.highlight .vi { color: #008080 } /* Name.Variable.Instance */
+.highlight .il { color: #009999 } /* Literal.Number.Integer.Long */
+.pl-c {
+    color: #969896;
+}
+
+.pl-c1,.pl-mdh,.pl-mm,.pl-mp,.pl-mr,.pl-s1 .pl-v,.pl-s3,.pl-sc,.pl-sv {
+    color: #0086b3;
+}
+
+.pl-e,.pl-en {
+    color: #795da3;
+}
+
+.pl-s1 .pl-s2,.pl-smi,.pl-smp,.pl-stj,.pl-vo,.pl-vpf {
+    color: #333;
+}
+
+.pl-ent {
+    color: #63a35c;
+}
+
+.pl-k,.pl-s,.pl-st {
+    color: #a71d5d;
+}
+
+.pl-pds,.pl-s1,.pl-s1 .pl-pse .pl-s2,.pl-sr,.pl-sr .pl-cce,.pl-sr .pl-sra,.pl-sr .pl-sre,.pl-src,.pl-v {
+    color: #df5000;
+}
+
+.pl-id {
+    color: #b52a1d;
+}
+
+.pl-ii {
+    background-color: #b52a1d;
+    color: #f8f8f8;
+}
+
+.pl-sr .pl-cce {
+    color: #63a35c;
+    font-weight: bold;
+}
+
+.pl-ml {
+    color: #693a17;
+}
+
+.pl-mh,.pl-mh .pl-en,.pl-ms {
+    color: #1d3e81;
+    font-weight: bold;
+}
+
+.pl-mq {
+    color: #008080;
+}
+
+.pl-mi {
+    color: #333;
+    font-style: italic;
+}
+
+.pl-mb {
+    color: #333;
+    font-weight: bold;
+}
+
+.pl-md,.pl-mdhf {
+    background-color: #ffecec;
+    color: #bd2c00;
+}
+
+.pl-mdht,.pl-mi1 {
+    background-color: #eaffea;
+    color: #55a532;
+}
+
+.pl-mdr {
+    color: #795da3;
+    font-weight: bold;
+}
+
+.pl-mo {
+    color: #1d3e81;
+}
+.task-list {
+padding-left:10px;
+margin-bottom:0;
+}
+
+.task-list li {
+    margin-left: 20px;
+}
+
+.task-list-item {
+list-style-type:none;
+padding-left:10px;
+}
+
+.task-list-item label {
+font-weight:400;
+}
+
+.task-list-item.enabled label {
+cursor:pointer;
+}
+
+.task-list-item+.task-list-item {
+margin-top:3px;
+}
+
+.task-list-item-checkbox {
+display:inline-block;
+margin-left:-20px;
+margin-right:3px;
+vertical-align:1px;
+}
+</style>
+</head>
+<body>
+<h2 id="spark-">Spark系统概述</h2>
+<ul>
+<li>Spark Core：基于RDD提供了丰富的操作接口，利用DAG进行统一的任务规划，使得Spark能够更加灵活地处理类似MapReduce的批处理作业</li><li>Spark SQL：兼容Hive的接口HQL，提供了比Hive高出10~100倍的查询速度的分布式SQL引擎</li><li>Spark Streaming：将流式计算分解成一系列的短小的批处理作业，利用Spark轻量级和低延时的调度框架，可以很好地支持流式处理。目前已经支持的数据输入源包括Kafka、Flume、Twitter、TCP sockets</li><li>GraphX：基于Spark的图计算框架，兼容Pregel和GraphLab接口，增强了图构建以及图转换功能。</li><li>MLlib：Spark Core天然地非常适合于迭代式计算，MLlib就是构建在Spark上的机器学习算法库。目前已经可以支持常用的分类算法、聚类算法、推荐算法等。</li></ul>
+<h2 id="spark-rdd-">Spark RDD及编程接口</h2>
+<h3 id="spark-hello-world-">spark程序“Hello world”</h3>
+<p>在一个存储于HDFS的Log文件中，计算出现过字符串“Hello World”的行数</p>
+<pre><code>val sc = new SparkContext(&quot;spark://...&quot;, &quot;Hello world&quot;, &quot;Your_SPARK_HOME&quot;,&quot;YOUR_APP_JAR&quot;)
+val file = sc.textFile(&quot;hdfs:///root/Log&quot;)
+val filterRDD = file.filter(_.contains(&quot;Hello World&quot;))
+filterRDD.cache()
+filterRDD.count()
+</code></pre><p>第一行：对于所有Spark程序，要进行任何操作，首先要创建一个Spark的上下文，在创建上下文的过程中，程序会向集群申请资源以及构建相应的运行环境。一般来说，创建SparkContext对象需要传入四个变量：第一个是Spark程序运行的集群地址，第二个参数是Spark的标识，第三个参数需要指明Spark的安装路径，最后一个参数需要传入这个Spark程序的jar包路径。</p>
+<p>第二行：通过sc变量，利用textFile接口从HDFS文件系统中读入Log文件，返回一个变量file。</p>
+<p>第三行：对file变量进行过滤操作，传入的参数是一个function对象，function对象的原型p: (A)=&gt;Boolean，对于file中的每一行字符串判断是否含有“Hello World”字符串，生成新的变量filterRDD</p>
+<p>第四行：对filterRDD进行cache操作，以便后续操作重用filterRDD这个变量</p>
+<p>第五行：对filterRDD进行count计数操作，最后返回包含“Hello World”字符串的文本行数。</p>
+<p>概念：弹性分布数据集</p>
+<p>创建操作：RDD的初始创建都是由SparkContext来负责的，将内存中的集合或者外部文件系统作为输入源</p>
+<p>转换操作：将一个RDD通过一定的操作变换成另一个RDD</p>
+<p>控制操作：对RDD进行持久化，可以让RDD保存在磁盘或者内存中，以便后续重复使用。比如cache接口默认将filterRDD缓存在内存中。</p>
+<p>行动操作：由于Spark是惰性计算的，所以对于任何RDD进行行动操作，都会触发Spark作业的运行，从而产生最终的结果。</p>
+<h3 id="sparkrdd">SparkRDD</h3>
+<p>一个RDD的生成只有两种途径，一是来自于内存集合和外部存储系统，另一种是通过转换操作来自于其他RDD，比如map、filter、join等等。</p>
+<p>RDD没有必要随时被实例化，由于RDD的接口只支持粗粒度的操作（即一个操作会被应用在RDD的所有数据上），所有只要通过记录下这些作用在RDD之上的转换操作，来构建RDD的继承关系，就可以有效地进行容错处理，而不需要将实际的RDD数据进行记录拷贝。因此在一个Spark程序中，用到的每一个RDD，在丢失或者操作失败后都是可以重建的。</p>
+<p><a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.rdd.RDD">Spark RDD接口</a></p>
+<ul>
+<li>RDD分区（partitions）</li></ul>
+<p>对于一个RDD而言，分区的多少涉及对这个RDD进行并行计算的粒度，每一个RDD分区的计算操作都在一个单独的任务中被执行。对于RDD的分区而言，用户可以自行指定多少分区，如果没有指定，那么将会使用默认值。</p>
+<p>可以利用RDD的成员变量partitions所返回的partition数组的大小来查询一个RDD被划分的分区数。</p>
+<pre><code>val rdd = sc.parallelize(1 to 100,2)
+
+rdd.partitions.size// Int = 2
+</code></pre><p>也可以在创建RDD的时候不指定分区，程序中初始创建出的RDD就采用系统默认的分区数，系统默认的数值是这个程序所分配到的资源的CPU核的个数。</p>
+<ul>
+<li>RDD优先位置</li></ul>
+<p>在Spark进行任务调度的时候，应该尽可能将任务分配到数据块所存储的位置，以从Hadoop中读取数据生成RDD为例，preferredLocations返回每一个数据块所在的机器名或者IP地址，如果每一块数据是多份存储的，机会返回多个机器地址。</p>
+<pre><code>val rdd = sc.textFile(&quot;hdfs://10.0.2.19:9000/bigfile&quot;)
+
+val hadoopRDD = rdd.dependencies(0).rdd
+
+hadoopRDD.partitions.size
+
+hadoopRDD.preferredLocations(hadoopRDD.partitions(0))
+</code></pre><ul>
+<li>RDD依赖关系</li></ul>
+<p>dependencies就是依赖的意思，由于RDD是粗粒度的操作数据集，每一个转换操作都会生成一个新的RDD，所以RDD之间就会形成类似于流水线一样的前后依赖关系，在Spark中存在两种类型的依赖，及窄依赖和宽依赖</p>
+<p>窄依赖：每一个父RDD的分区最多只被子RDD的一个分区所使用</p>
+<p>宽依赖：多个子RDD的分区会依赖于同一个父RDD的分区</p>
+<p>==转换操作Map和Filter就会形成一个窄依赖，而没有经过co-partition操作的两个RDD数据集之间进行join操作就会形成宽依赖==</p>
+<p>窄依赖可以在集群的一个节点上如流水线一般地执行，可以计算所有父RDD的分区，相反的，宽依赖需要取得父RDD的所有分区上的数据进行计算，将会执行类似于MapReduce一样的Shuffle操作。</p>
+<p>对于窄依赖来说，节点计算失败后的恢复会更加有效，只需要重新计算对应的父RDD的分区，而且可以在其他的节点上并行地计算，相反的，在有宽依赖的继承关系中，一个节点的失败将会导致其父RDD的多个分区重新计算。</p>
+<p>最大的区别是 是否进行洗牌</p>
+<pre><code>val rdd = sc.makeRDD(1 to 10)
+
+val mapRDD = rdd.map(x =&gt; (x,x))
+
+mapRDD.dependencies
+
+val shuffleRDD = mapRDD.partitionBy(new org.apache.spark.HashPartitioner(3))
+
+shuffleRDD.dependencies
+</code></pre><p>上面的程序表示了两种依赖关系的写法</p>
+<ul>
+<li>RDD分区计算</li></ul>
+<p>Spark中每个RDD的计算都是以partition（分区）为单位的，而且RDD中的compute函数都是在对迭代器符合，不需要保存每次计算的结果。</p>
+<p>partitioner是RDD的分区函数，目前在Spark中实现了两种类型的分区函数，即HashPatitioner（哈希分区）和RangePatitioner（区域分区），且partitioner这个属性只存在于（K,V）类型的RDD中，对于非（K,V）类型的partitioner就是None。</p>
+<p>partitioner函数既决定了RDD本身的分区数量，也可作为其父RDD Shuffle输出中每个分区进行数据切割的依据。</p>
+<pre><code>val rdd = sc.makeRDD(1 to 10, 2).map(x =&gt; (x,x))
+rdd.partitioner
+val group_rdd = rdd.groupByKey(new org.apache.spark.HashPartitioner(3))
+group_rdd.partitioner
+group_rdd.collectPartitions()
+</code></pre><p>在上面程序中，首先构建了一个MappedRDD，其partitioner的值为None，然后对rdd进行groupByKey操作得出group_rdd变量，对于groupByKey操作而言，这里创建了新的HashPartitioner对象，参数“3”代表了group_rdd最终会拥有三个分区。最后对group_rdd执行collectPartitions行动操作（查看每一个分区内的值）。</p>
+<h3 id="rdd-api">RDD API</h3>
+<ul>
+<li>RDD创建</li></ul>
+<p>1.集合创建操作</p>
+<p>parallelize和makeRDD的区别在于makeRDD还提供了一个可以指定每一个分区preferredLocation参数的实现版本。</p>
+<pre><code>val rdd = sc.makeRDD(1 to 10,3)
+rdd.collectPartitions()
+val collect = Seq((1 to 10, Seq(&quot;host1&quot;, &quot;host3&quot;)),(11 to 20, Seq(&quot;host2&quot;)))
+val rdd = sc.makeRDD(collect)
+rdd.preferredLocations(rdd.partitions(0))//存放在第一个分区的数据
+rdd.preferredLocations(rdd.partitions(1))
+</code></pre><p>2.存储创建操作</p>
+<p>textFile()</p>
+<ul>
+<li>RDD转换</li></ul>
+<p>一、RDD基本转换操作</p>
+<p>1.map,distinct(),flatMap:flatMap函数是将RDD中的每一个元素进行一对多转换？？</p>
+<p>2.repartition和coalesce：对RDD的分区进行重新划分，repartition只是coalesce接口中shuffle为true的简易实现。</p>
+<p>至于coalesce合并函数应该如何设置shuffle参数，这里分三种情况：</p>
+<blockquote>
+<p>如果N&lt;M，一般情况下N个分区有数据分布不均的情况，利用HashPartitioner函数将数据重新分区成M个，这时需要将shuffle参数设置为true。</p>
+<p>如果N&gt;M且N和M相差不多，那么就可以将N个分区中的若干个分区合并成一个新的分区，最终合并成M个分区，这事可以将shuffle参数设置为false，不进行shuffle过程，父RDD和子RDD之间是窄依赖关系。</p>
+<p>如果N&gt;M且N和M差距悬殊，如果把shuffle参数设置为false，由于父子RDD是窄依赖，它们同处在一个Stage中，就会造成Spark程序运行的并行度不够，从而影响性能。为了是coalesce之前的操作有更好的并行度，可以将shuffle参数设置为true</p>
+</blockquote>
+<p>这里需要在程序运行的并行度和shuffle数据写磁盘这两个因素之间找到平衡。</p>
+<p>当shuffle参数为false是，如果传入的参数大于现有分区树，那么分区数保持不变，也就是说在不进行shuffle洗牌的情况下，无法将RDD的分区数目变多。</p>
+<p>3.randomSplit，glom()</p>
+<p>randomSplit和glom的返回值中Array和RDD是颠倒的，randomSplit函数是根据weights权重将一个RDD切分成多个RDD，而glom函数是将RDD中每一个分区中类型为T的元素转换成数组Array[T]，这样每一个分区就只有一个数组元素。</p>
+<p>4.union,intersection,subtract</p>
+<p>针对RDD的集合操作，union操作将两个RDD集合中的数据进行合并，返回两个RDD的并集（包含两个RDD中相同的元素，不会去重）。intersection操作返回两个RDD集合的交集，且交集中不会包含相同的元素。如果subtract所针对的两个集合是A和B，即操作为</p>
+<pre><code>val result = A.subtract(B)
+</code></pre><p>那么result中将会包含在A中出现且不在B中出现的元素。intersection和subtract一般情况下都会有shuffle的过程</p>
+<p>5.mapPartitoins,mapPartitionsWithIndex</p>
+<p>mapPartitions与map转换操作类似，只不过映射函数的输入参数由RDD中的每一个元素变成了RDD中每一个分区的迭代器，利用mapPartitoins接口可以针对每一个分区创建一个connection，在映射过程中需要频繁创建额外对象的时候比较有用。mapPartitionsWithIndex和mapPartitions功能类似，只是输入参数多了一个分区的ID。</p>
+<p>6.zip,zipPartitions</p>
+<p>zip函数的功能是将两个RDD组合成Key/Value形式的RDD，这里默认两个RDD的partition数量以及元素数量相同，否则系统将会抛出异常。zipPartitions是将多个RDD按照partition组合成为新的RDD，zipPartitions需要相互组合的RDD具有相同的分区数，但是对于每个分区的元素数量是没有要求的。</p>
+<p>7.zipWithIndex()，zipWithUniqueId():</p>
+<p>zipWithIndex是将RDD中的元素和这个元素的ID组合成键值对，比如第一个分区的第一个元素是0，第一个分区的第二个元素是1。zipWIthUniqueId是将RDD中的元素和一个唯一ID组合成键值对，假设RDD共有N个分区，那么第一个分区的第一个元素的唯一ID就是1，第一个分区的第二个元素就是1+N,第一个分区的第三个元素就是1+2*N，以此类推。</p>
+<p>zipWithIndex和zipWithUniqueId的主要区别就是zipWithIndex需要启动一个Spark作业来计算每一个分区的开始索引号，以便能顺序索引。而zipWithUniqueId不需要这样的作业。</p>
+<p>二、键值RDD转换操作</p>
+<p>1.partitionBy,mapValues,flatMapValues</p>
+<p>partitionBy、mapValues和flatMapValues和基本转换操作中的repartition、map和flatMap功能类似。partitionBy接口根据partitioner函数生成新的ShuffledRDD，将原RDD重新分区（在repartition中也是先将RDD[T]转化成RDD[K,V]，这里的V是null，然后使用RDD[K,V]作为函数生成SHuffledRDD）。mapValues和flatMapValues针对[K,V]中的V值进行map操作和flatMap操作。</p>
+<p>2.combineByKey,foldByKey,reduceByKey,groupByKey</p>
+<p>四种键值对转换操作都是针对RDD[K,V]本身，不涉及与其他RDD的组合操作，四种操作类型最终都会归结为对combinByKey的调用。combineByKey接口是将RDD[K,V]转化成返回类型RDD[K,C]，这里V类型与C类型可以相同也可以不同。</p>
+<p>3.join、leftOuterJoin、rightOuterJoin</p>
+<p>join、leftOuterJoin、rightOuterJoin都是针对RDD[K,V]中K值相等的连接操作，最终都会调用cogroup来实现。而subtractByKey和基本转换操作subtract类似，只是针对RDD[K,V]中的K值来进行操作。</p>
+<ul>
+<li>控制操作</li></ul>
+<p>cache(),persist()</p>
+<p>在Spark中对RDD进行持久化可以将RDD持久化在不同层次的存储介质中，以便后续的操作能够重复使用，这对iterative和interactive的应用会有很大的提高。</p>
+<p>checkpoint</p>
+<p>checkpoint是将RDD持久化在HDFS中，其与persist的一个区别是checkpoint会切断此RDD之前的依赖关系，而persist接口一栏保留着RDD的依赖关系。</p>
+<p>checkpoint的主要作用有如下两点：</p>
+<blockquote>
+<p>如果一个Spark程序会长时间驻留运行，过程的依赖将会占用很多系统资源，那么定期将RDD进行checkpoint操作，能够有效地节省系统资源。</p>
+<p>维护过长的依赖关系还会出现一个问题，如果Spark在运行过程中出现节点失败的情况，那么RDD进行容错重算的成本会非常高。</p>
+</blockquote>
+<pre><code>val rdd = sc.makeRDD(1 to 4, 1)
+val flatMapRDD = rdd.flatMap(x=&gt;Seq(x,x))
+sc.setCheckpointDir(&quot;temp&quot;)
+flatMapRDD.checkpoint()
+flatMapRDD.collect()
+flatMapRDD.dependencies.head.rdd
+</code></pre><ul>
+<li>行动操作</li></ul>
+<p>1.集合标量行动</p>
+<p>first:返回RDD中第一个元素</p>
+<p>count：返回RDD中元素的个数</p>
+<p>reduce(f: (T,T)=&gt;T)：对RDD中的元素进行二元计算，返回计算结果</p>
+<p>collect():以集合形式返回RDD的元素</p>
+<p>take(num: Int):将RDD作为集合，返回集合中[0,num-1]下标的元素</p>
+<p>top(num: Int):按照默认的或者是指定的排序规则，返回前num个元素</p>
+<p>takeOrdered(num: Int):以与top相反的排序规则，返回前num个元素</p>
+<p>==aggregate:行动操作中主要提供两个函数，一个是seqOp函数，其将RDD中的每一个分区的数据聚合成类型为U的值。另一个函数combOp将各个分区聚合起来的值合并在一起得到最终类型为U的返回值。这里的RDD元素的类型T和返回值的类型U可以为同一个类型。==</p>
+<p>fold:fold是aggregate的便利接口，其中，op操作既是seqOp操作也是combOp操作，且最终的返回类型也是T，即与RDD中每一个元素的类型是一样的。</p>
+<p>对fold而言，聚合以及合并阶段都用的是同一个函数</p>
+<p>lookup(key:K):Seq[V]:lookup是针对(K,V)类型的RDD的行动操作，对于给定的键值，返回与此键值相对应的所有值。</p>
+<pre><code>rdd.lookup(&quot;a&quot;)
+</code></pre><p>2.存储行动操作</p>
+<p>saveAsTextFile<br>saveAsObjectFile</p>
+<h3 id="pagerank-">PageRank中的依赖关系</h3>
+<p>PageRank，网页排名，又称网页级别、Google左侧排名或佩奇排名，是一种根据网页之间相互的超链接计算的技术，而作为网页排名的要素之一，以Google公司创办人拉里·佩奇（Larry Page）之姓来命名。Google用它来体现网页的相关性和重要性，在搜索引擎优化操作中是经常被用来评估网页优化的成效因素之一。Google的创始人拉里·佩奇和谢尔盖·布林于1998年在斯坦福大学发明了这项技术。<br>PageRank通过网络浩瀚的超链接关系来确定一个页面的等级。Google把从A页面到B页面的链接解释为A页面给B页面投票，Google根据投票来源（甚至来源的来源，即链接到A页面的页面）和投票目标的等级来决定新的等级。简单的说，一个高等级的页面可以使其他低等级页面的等级提升。</p>
+<p>PageRank让链接来&quot;投票&quot;</p>
+<p>一个页面的“得票数”由所有链向它的页面的重要性来决定，到一个页面的超链接相当于对该页投一票。一个页面的PageRank是由所有链向它的页面（“链入页面”）的重要性经过递归算法得到的。一个有较多链入的页面会有较高的等级，相反如果一个页面没有任何链入页面，那么它没有等级。</p>
+<p>假设一个由4个页面组成的小团体：A，B，C和D。如果所有页面都链向A，那么A的PR（PageRank）值将是B，C及D的Pagerank总和。</p>
+<pre><code>var links = sc.parallelize(Array((&#39;A&#39;,Array(&#39;D&#39;)),(&#39;B&#39;,Array(&#39;A&#39;)), (&#39;C&#39;,Array(&#39;A&#39;,&#39;B&#39;)), (&#39;D&#39;,Array(&#39;A,&#39;C&#39;))),2)
+
+var links = links.map(x=&gt;(x._1, x._2)).cache()
+
+var ranks = sc.parallelize(Array((&#39;A&#39;,1.0),(&#39;B&#39;,1.0),(&#39;C&#39;,1.0).(&#39;D&#39;,1.0)),2)
+
+for(i &lt;- 1 to ITERATIONS){
+    val contribs = links.join(ranks,2)
+    val flatMapRDD = contribs.flatMap{case(url,(links,rank))=&gt;links.map(dest=&gt;(dest,rank/links.size))}
+    val reduceByKeyRDD = flatMapRDD.reduceByKey(_+_,2)
+    val ranks = reduceByKeyRDD.mapValues(0.15+0.85*_)
+}
+</code></pre><p>简单的PageRank算法存在两个重要的数据结构，分别是ranks（每个URL的权重，初始值为1）和links（记录这URL之间的指向的关系），则PageRank算法可以描述如下：</p>
+<p>1.将每一个URL的权重都设置为1<br>2.对于每一次迭代，将每一个URL的权重贡献发送给邻居<br>3.对于每一个URL，将收到的权重贡献相加成contribs，重新计算ranks=0.15+0.85*contribs</p>
+<p>PageRank可以优化的方法是利用partitioner分区函数对links首先进行分区partitionBy操作，这样可以使得PageRank后续的每一次迭代中的join操作省去Shuffle的过程，提高了程序运行的效率。</p>
+<p>从Spark的角度，PageRank每一次迭代中会和生成四个新的RDD，但实际在Spark内部生成了八个RDD。多出来的RDD是在转换操作过程中产生的临时RDD。</p>
+<p>在PageRank的迭代算法中需要进行一次flatMap操作，以得到flatMapRDD。此RDD已经丢失partitioner函数的信息，所以在进行reduceByKey的过程中仍然有shuffle的过程。</p>
+
+</body>
+</html>
+<!-- This document was created with MarkdownPad, the Markdown editor for Windows (http://markdownpad.com) -->
